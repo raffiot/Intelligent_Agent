@@ -3,5 +3,6 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/LogistLibrary"/>
+	<classpathentry kind="lib" path="C:/Users/advif/Google Drive/MEGA/AAA Uni/Universidad/4 Año/7 Sem/Intelligent Agents - 430/gitHub/Intelligent_Agent/logist.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
