@@ -1,39 +1,72 @@
 package template;
 
+import java.util.ArrayList;
+
+import logist.topology.Topology.City;
+
 public class Node {
-	double weight; //Actual weight of the truck
-	double cost; //Cost up to that task
-	boolean type; //false = pick, true = delivery
-	
-	public Node(double weight, double cost, boolean type) {
-		this.weight = weight;
+	private int capacity; // Actual capacity of the truck
+	private int cost; // Cost up to that task
+	private City from, to; // If fromm == null -> Type == Delivery
+	private ArrayList<Node> children;
+
+	public Node(int capacity, int cost, City from, City to) {
+		this.capacity = capacity;
 		this.cost = cost;
-		this.type = type;
+		this.from = from;
+		this.to = to;
+		children = new ArrayList<Node>();
 	}
 
-	public double getWeight() {
-		return weight;
+	public Node(int capacity, City from, City to) {
+		this.capacity = capacity;
+		this.from = from;
+		this.to = to;
+		children = new ArrayList<Node>();
 	}
 
-	public void setWeight(double weight) {
-		this.weight = weight;
+	public void addChild(Node child) {
+		children.add(child);
 	}
 
-	public double getCost() {
+	public boolean isTypeTask() {
+		return from != null && to != null;
+	}
+
+	public ArrayList<Node> getChildren() {
+		return children;
+	}
+
+	public int getCapacity() {
+		return capacity;
+	}
+
+	public void setCapacity(int capacity) {
+		this.capacity = capacity;
+	}
+
+	public int getCost() {
 		return cost;
 	}
 
-	public void setCost(double cost) {
+	public void setCost(int cost) {
 		this.cost = cost;
 	}
 
-	public boolean isType() {
-		return type;
+	public City getFrom() {
+		return from;
 	}
 
-	public void setType(boolean type) {
-		this.type = type;
+	public void setFrom(City from) {
+		this.from = from;
 	}
 
+	public City getTo() {
+		return to;
+	}
+
+	public void setTo(City to) {
+		this.to = to;
+	}
 
 }
