@@ -1,72 +1,85 @@
 package template;
 
-import java.util.ArrayList;
+import java.util.*;
 
+import logist.task.Task;
 import logist.topology.Topology.City;
 
-public class Node {
-	private int capacity; // Actual capacity of the truck
-	private int cost; // Cost up to that task
-	private City from, to; // If fromm == null -> Type == Delivery
-	private ArrayList<Node> children;
+public abstract class Node {
 
-	public Node(int capacity, int cost, City from, City to) {
-		this.capacity = capacity;
-		this.cost = cost;
-		this.from = from;
-		this.to = to;
+	private Node parent;
+	private List<Node> children;
+	private Task task;
+	private double cost;
+	
+	public Node(Task t){
+		parent = null;
+		this.task = t;
 		children = new ArrayList<Node>();
+		cost = 0;
 	}
-
-	public Node(int capacity, City from, City to) {
-		this.capacity = capacity;
-		this.from = from;
-		this.to = to;
+	
+	//Constructor for initial nodes
+	public Node(){
+		parent = null;
 		children = new ArrayList<Node>();
+		task = null;
+		cost = 0;
 	}
-
-	public void addChild(Node child) {
+	
+	public Node(Node p, Task t){
+		parent = p;
+		this.task = t;
+		children = new ArrayList<Node>();
+		cost = 0;
+	}
+	
+	public void addChild(Node child){
 		children.add(child);
 	}
-
-	public boolean isTypeTask() {
-		return from != null && to != null;
-	}
-
-	public ArrayList<Node> getChildren() {
-		return children;
-	}
-
-	public int getCapacity() {
-		return capacity;
-	}
-
-	public void setCapacity(int capacity) {
-		this.capacity = capacity;
-	}
-
-	public int getCost() {
-		return cost;
-	}
-
-	public void setCost(int cost) {
-		this.cost = cost;
-	}
-
+	
 	public City getFrom() {
-		return from;
-	}
-
-	public void setFrom(City from) {
-		this.from = from;
+		return task.pickupCity;
 	}
 
 	public City getTo() {
-		return to;
+		return task.deliveryCity;
 	}
 
-	public void setTo(City to) {
-		this.to = to;
+	public int getWeight(){
+		return task.weight;
+	}
+	
+	public abstract int getType();
+
+	public Node getParent() {
+		return parent;
 	}
 
+	public void setParent(Node parent) {
+		this.parent = parent;
+	}
+	
+	public List<Node> getChildren() {
+		return children;
+	}
+
+	public double getCost() {
+		return cost;
+	}
+
+	public void setCost(double cost) {
+		this.cost = cost;
+	}
+	
+	public Task getTask(){
+		return task;
+	}
+	
+	public abstract City getCityOfNode();
+	
+	@Override
+	public abstract Node clone();
+	
+	
 }
