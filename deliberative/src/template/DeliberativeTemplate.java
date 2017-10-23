@@ -2,6 +2,11 @@ package template;
 
 /* import table */
 import logist.simulation.Vehicle;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Set;
+
 import logist.agent.Agent;
 import logist.behavior.DeliberativeBehavior;
 import logist.plan.Plan;
@@ -10,6 +15,10 @@ import logist.task.TaskDistribution;
 import logist.task.TaskSet;
 import logist.topology.Topology;
 import logist.topology.Topology.City;
+import logist.plan.Action;
+import logist.plan.Action.Delivery;
+import logist.plan.Action.Move;
+import logist.plan.Action.Pickup;
 
 /**
  * An optimal planner for one vehicle.
@@ -26,9 +35,14 @@ public class DeliberativeTemplate implements DeliberativeBehavior {
 	/* the properties of the agent */
 	Agent agent;
 	int capacity;
+	TaskSet tasks;
 
 	/* the planning class */
 	Algorithm algorithm;
+	
+	City currentCity;
+	Vehicle vehicle;
+	Set<Task> tasksTODO;
 	
 	@Override
 	public void setup(Topology topology, TaskDistribution td, Agent agent) {
@@ -38,6 +52,7 @@ public class DeliberativeTemplate implements DeliberativeBehavior {
 		
 		// initialize the planner
 		int capacity = agent.vehicles().get(0).capacity();
+		this.capacity = capacity;
 		String algorithmName = agent.readProperty("algorithm", String.class, "ASTAR");
 		
 		// Throws IllegalArgumentException if algorithm is unknown
@@ -49,21 +64,87 @@ public class DeliberativeTemplate implements DeliberativeBehavior {
 	@Override
 	public Plan plan(Vehicle vehicle, TaskSet tasks) {
 		Plan plan;
-
+		this.vehicle = vehicle;		
+		
 		// Compute the plan with the selected algorithm.
 		switch (algorithm) {
 		case ASTAR:
 			// ...
 			plan = naivePlan(vehicle, tasks);
 			break;
-		case BFS:
-			Tree t = new Tree(vehicle,tasks);
-			plan = t.bFS();
+		case BFS:			
+			currentCity = vehicle.getCurrentCity();
+			plan = new Plan(currentCity); //Check
+			this.tasks = tasks;
+			ArrayList<Action> actions;
+			tasksTODO = tasks;
+			tasksTODO.addAll(vehicle.getCurrentTasks());
+			
+			
+			while(!tasksTODO.isEmpty()) {
+				actions = bFS();
+				for (Action a : actions) {
+					plan.append(a);
+					System.out.println(a);
+				}
+			}
+			
 			break;
 		default:
 			throw new AssertionError("Should not happen.");
 		}		
 		return plan;
+	}
+	
+	private ArrayList<Action> bFS () {
+		ArrayList<Action> actions = new ArrayList<Action>();
+		ArrayList<City> queue = new ArrayList<City>();
+		ArrayList<City> visited = new ArrayList<City>();
+		HashMap<City, Task> goalsDelivery = new HashMap<City, Task>();
+		HashMap<City, Task> goalsPick = new HashMap<City, Task>();
+		
+		for (Task t : tasksTODO) {
+			if (tasks.contains(t))
+				goalsPick.put(t.pickupCity, t);
+			else
+				goalsDelivery.put(t.deliveryCity, t);
+
+		}
+		
+		visited.add(currentCity);
+		queue.add(currentCity);
+		
+		while(!queue.isEmpty()) {
+			City city = queue.remove(0);
+			
+			for(City c : city.neighbors()) {
+				if(!visited.contains(c)) {
+					this.currentCity = c;
+					visited.add(c);
+					queue.add(c);
+					actions.add(new Move(c));
+
+					if (goalsDelivery.containsKey(c)) {
+						Task t = goalsDelivery.get(c);
+						actions.add(new Delivery(t));
+						this.capacity += t.weight;
+						tasksTODO.remove(t);
+						goalsDelivery.remove(c);
+					}
+					if (goalsPick.containsKey(c) && goalsPick.get(c).weight < this.capacity) {
+						Task t = goalsPick.get(c);
+						goalsDelivery.put(t.deliveryCity, t);
+						actions.add(new Pickup(t));
+						this.capacity -= t.weight;
+						goalsPick.remove(c);
+						//tasksTODO.remove(t); No la elimino, ahora se ha convertido en una tarea a entregar
+						
+					}
+				}
+			}
+		}
+		
+		return actions;
 	}
 	
 	private Plan naivePlan(Vehicle vehicle, TaskSet tasks) {
