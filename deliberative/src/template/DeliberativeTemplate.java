@@ -42,7 +42,9 @@ public class DeliberativeTemplate implements DeliberativeBehavior {
 	
 	City currentCity;
 	Vehicle vehicle;
-	Set<Task> tasksTODO;
+	Set<Task> tasksToDeliber;
+	Set<Task> tasksToPick;
+
 	
 	@Override
 	public void setup(Topology topology, TaskDistribution td, Agent agent) {
@@ -77,11 +79,11 @@ public class DeliberativeTemplate implements DeliberativeBehavior {
 			plan = new Plan(currentCity); //Check
 			this.tasks = tasks;
 			ArrayList<Action> actions;
-			tasksTODO = tasks;
-			tasksTODO.addAll(vehicle.getCurrentTasks());
+			tasksToDeliber = vehicle.getCurrentTasks();
+			tasksToPick = tasks;
 			
 			
-			while(!tasksTODO.isEmpty()) {
+			while(!tasksToDeliber.isEmpty() || !tasksToPick.isEmpty()) {
 				actions = bFS();
 				for (Action a : actions) {
 					plan.append(a);
@@ -100,16 +102,13 @@ public class DeliberativeTemplate implements DeliberativeBehavior {
 		ArrayList<Action> actions = new ArrayList<Action>();
 		ArrayList<City> queue = new ArrayList<City>();
 		ArrayList<City> visited = new ArrayList<City>();
-		HashMap<City, Task> goalsDelivery = new HashMap<City, Task>();
+		HashMap<City, Task> goalsDelibery = new HashMap<City, Task>();
 		HashMap<City, Task> goalsPick = new HashMap<City, Task>();
 		
-		for (Task t : tasksTODO) {
-			if (tasks.contains(t))
-				goalsPick.put(t.pickupCity, t);
-			else
-				goalsDelivery.put(t.deliveryCity, t);
-
-		}
+		for (Task t : tasksToPick) 
+			goalsPick.put(t.pickupCity, t);
+		for (Task t : tasksToDeliber) 
+			goalsDelibery.put(t.deliveryCity, t);
 		
 		visited.add(currentCity);
 		queue.add(currentCity);
@@ -124,19 +123,22 @@ public class DeliberativeTemplate implements DeliberativeBehavior {
 					queue.add(c);
 					actions.add(new Move(c));
 
-					if (goalsDelivery.containsKey(c)) {
-						Task t = goalsDelivery.get(c);
+					if (goalsDelibery.containsKey(c)) {
+						Task t = goalsDelibery.get(c);
 						actions.add(new Delivery(t));
 						this.capacity += t.weight;
-						tasksTODO.remove(t);
-						goalsDelivery.remove(c);
+						tasksToDeliber.remove(t);
+						goalsDelibery.remove(c);
 					}
 					if (goalsPick.containsKey(c) && goalsPick.get(c).weight < this.capacity) {
 						Task t = goalsPick.get(c);
-						goalsDelivery.put(t.deliveryCity, t);
+						goalsDelibery.put(t.deliveryCity, t);
 						actions.add(new Pickup(t));
 						this.capacity -= t.weight;
+						tasksToPick.remove(t);
 						goalsPick.remove(c);
+						tasksToDeliber.add(t);
+						goalsDelibery.put(t.deliveryCity, t);
 						//tasksTODO.remove(t); No la elimino, ahora se ha convertido en una tarea a entregar
 						
 					}
