@@ -45,9 +45,9 @@ public class DeliberativeTemplate implements DeliberativeBehavior {
 	Set<Task> tasksToDeliber; //Creo que sobra
 	Set<Task> tasksToPick; //Creo que sobra
 	HashMap<Task, Boolean> tasksToDo;	
-
-
-
+	
+	
+	
 	@Override
 	public void setup(Topology topology, TaskDistribution td, Agent agent) {
 		this.topology = topology;
@@ -68,63 +68,87 @@ public class DeliberativeTemplate implements DeliberativeBehavior {
 	@Override
 	public Plan plan(Vehicle vehicle, TaskSet tasks) {
 		Plan plan;
-		this.vehicle = vehicle;		
+		this.vehicle = vehicle;	
+		currentCity = vehicle.getCurrentCity();
+		tasksToDeliber = vehicle.getCurrentTasks();
+		tasksToPick = tasks;
+		tasksToDo = new HashMap<Task, Boolean>();	
+
+		for (Task t : tasksToDeliber)
+			tasksToDo.put(t, true);
+
+		for (Task t : tasksToPick)
+			tasksToDo.put(t, false);
 
 		// Compute the plan with the selected algorithm.
 		switch (algorithm) {
 		case ASTAR:
 			// ...
-			plan = naivePlan(vehicle, tasks);
+					plan = null; //Delete this!!
+			HashMap<Task, Boolean> allTasksASTAR =  new HashMap<Task, Boolean>(tasksToDo);
+			HashMap<Node, Double> q = new HashMap<Node, Double>	(); //Q at the notes given
+			HashMap<Node, Double> c = new HashMap<Node, Double>	(); //C at the notes given
+			Node n = null;
+			int totalTasks = 2*tasks.size() + vehicle.getCurrentTasks().size();
+			
+			q.put(new Node(), 0.);
+			
+			while (true) {
+				System.out.println("     Iter");
+				//if Q.isEmpty -> failure
+				n = getMinCostNode(q);
+				q.remove(n);
+				
+				if (totalTasks == n.getNumerOfTasksDone())
+					break; 
+				
+				
+				//Check for C
+				HashMap<Node, Double> s = succ(n, tasksToDo);
+				q = merge(q, s);
+				
+				System.out.println("Printing q at the end of each while   !");
+				for (Node nTest : q.keySet())
+					System.out.println(nTest);
+				
+				//Problem!!! Q is empty, it should have the succ
+			}
+			
+			
+			//Test
+			System.out.println(" Parents from best action ");
+			Node father = n;
+			while (father != null) {
+				System.out.println(father.getTask() + "    Type: " + father.getType());
+				father = father.getParent();
+			}
+			
+			
+			
+			//Calculate path with n
+			
+					
 			break;
 		case BFS:	
-			currentCity = vehicle.getCurrentCity();
-			plan = new Plan(currentCity); //Check
+			plan = new Plan(currentCity);
 			this.tasks = tasks;
 			ArrayList<Action> actions;
-			tasksToDeliber = vehicle.getCurrentTasks();
-			tasksToPick = tasks;
-			tasksToDo = new HashMap<Task, Boolean>();	
 
-
-			for (Task t : tasksToDeliber)
-				tasksToDo.put(t, true);
-
-			for (Task t : tasksToPick)
-				tasksToDo.put(t, false);
-
-			ArrayList<Task> tasksBFS = bFS();
-
-			plan = new Plan(currentCity);
-
-			for (Task t : tasksBFS) {
+			for (Task t : bFS()) {
 				if(tasksToDo.get(t)) {  //Delivery
-					for(City c : currentCity.pathTo(t.deliveryCity))
-						plan.append(new Move(c));	
+					for(City c2 : currentCity.pathTo(t.deliveryCity))
+						plan.append(new Move(c2));	
 					currentCity = t.deliveryCity;
 					plan.append(new Delivery(t));
 					tasksToDo.remove(t);
 				}else { //Pick
-					for(City c : currentCity.pathTo(t.pickupCity))
-						plan.append(new Move(c));	
+					for(City c1 : currentCity.pathTo(t.pickupCity))
+						plan.append(new Move(c1));	
 					currentCity = t.pickupCity;
 					plan.append(new Pickup(t));
 					tasksToDo.replace(t, true);
 				}
 			}
-			//			//TEST
-//			System.out.println();
-//			System.out.println();
-//			System.out.println("Tareas   ");
-//			for(Task t : tasksBFS)
-//				System.out.println(t);				
-//			System.out.println();
-//			System.out.println();
-//			System.out.println();
-//			System.out.println();
-//			System.out.println();
-//			System.out.println();
-//			for(Action a : plan)
-//				System.out.println(a);
 			break;
 		default:
 			throw new AssertionError("Should not happen.");
@@ -132,6 +156,56 @@ public class DeliberativeTemplate implements DeliberativeBehavior {
 		return plan; //Changed for testing
 	}
 
+	
+	private Node getMinCostNode(HashMap<Node, Double> nodes){
+		for(Node n : nodes.keySet())
+			System.out.println(n + " Node ");
+		Node node = nodes.keySet().iterator().next();
+
+		for(Node n : nodes.keySet())
+			if (node.getCost() > n.getCost())
+				node = n;
+
+		return node;
+	}
+	
+	private HashMap<Node, Double> succ(Node node, HashMap<Task, Boolean> allTasks){ //All tasks must be setted at the very beggining and not changed
+		HashMap<Node, Double> res = new HashMap<Node, Double>();
+		HashMap<Task, Boolean> tasksDone = node.getTasksDone();
+		for(Task t : allTasks.keySet()) {
+			if (! tasksDone.containsKey(t)) { //Not delivered not picked
+				if(! allTasks.get(t)) { //Type == pick
+					if (node.getTask() == null) //For initial node
+						res.put(new Node(t, false, node, 0.), currentCity.distanceTo(t.pickupCity));
+					else
+						res.put(new Node(t, false, node, node.getCityOfNode().distanceTo(t.pickupCity)), node.getCityOfNode().distanceTo(t.pickupCity));
+				}else //Type == delivery
+					res.put(new Node(t, true, node, node.getCityOfNode().distanceTo(t.deliveryCity)), node.getCityOfNode().distanceTo(t.deliveryCity));
+			}else { //Task is already Picked or delivered
+				if(! tasksDone.get(t)) //Picked -> have to add the delivery
+					res.put(new Node(t, true, node, node.getCityOfNode().distanceTo(t.deliveryCity)), node.getCityOfNode().distanceTo(t.deliveryCity)); 
+				//Else, Delivered -> no action for that task
+			}
+		}
+		return res;	
+	} 
+
+	private HashMap<Node, Double> merge(HashMap<Node, Double> q, HashMap<Node, Double> s){
+		for (Node nS : s.keySet()) {
+			for(Node nQ : q.keySet()) {
+				if (nQ.getTask().equals(nS.getTask()) && s.get(nS) == q.get(nQ)) { //We have found a new road for the same node so we compare it and if its shorter we change in q
+					if(nQ.getCost() > nS.getCost()) {
+						q.put(nS, nS.getCost());
+						q.remove(nQ);
+					}
+				}else  //New succ not present in q, add it.
+					q.put(nS, s.get(nS));
+			}
+		}
+		return q;
+	}
+
+	
 	private ArrayList<Task> bFS () { 
 		ArrayList<Task> path = new ArrayList<Task>(); //Result
 		ArrayList<Task> queue = new ArrayList<Task>(); //Initial node, no task
