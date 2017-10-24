@@ -102,9 +102,10 @@ public class DeliberativeTemplate implements DeliberativeBehavior {
 				if (totalTasks == n.getNumerOfTasksDone())
 					break; 
 				
-				
 				//Check for C
+				
 				HashMap<Node, Double> s = succ(n, tasksToDo);
+			
 				q = merge(q, s);
 				
 				System.out.println("Printing q at the end of each while   !");
@@ -116,8 +117,9 @@ public class DeliberativeTemplate implements DeliberativeBehavior {
 			
 			
 			//Test
-			System.out.println(" Parents from best action ");
 			Node father = n;
+			System.out.println(" Parents from best action, size " + father.getNumerOfTasksDone());
+
 			while (father != null) {
 				System.out.println(father.getTask() + "    Type: " + father.getType());
 				father = father.getParent();
@@ -158,8 +160,6 @@ public class DeliberativeTemplate implements DeliberativeBehavior {
 
 	
 	private Node getMinCostNode(HashMap<Node, Double> nodes){
-		for(Node n : nodes.keySet())
-			System.out.println(n + " Node ");
 		Node node = nodes.keySet().iterator().next();
 
 		for(Node n : nodes.keySet())
@@ -191,18 +191,23 @@ public class DeliberativeTemplate implements DeliberativeBehavior {
 	} 
 
 	private HashMap<Node, Double> merge(HashMap<Node, Double> q, HashMap<Node, Double> s){
+		HashMap<Node, Double> r = new HashMap<Node, Double> ();
 		for (Node nS : s.keySet()) {
-			for(Node nQ : q.keySet()) {
-				if (nQ.getTask().equals(nS.getTask()) && s.get(nS) == q.get(nQ)) { //We have found a new road for the same node so we compare it and if its shorter we change in q
-					if(nQ.getCost() > nS.getCost()) {
-						q.put(nS, nS.getCost());
-						q.remove(nQ);
-					}
-				}else  //New succ not present in q, add it.
-					q.put(nS, s.get(nS));
+			if (q.size() == 0) //Case q is empty
+				q.put(nS, s.get(nS));
+			else {
+				for(Node nQ : q.keySet()) {
+					if (nQ.getTask().equals(nS.getTask()) && s.get(nS) == q.get(nQ)) { //We have found a new road for the same node so we compare it and if its shorter we change in q
+						if(nQ.getCost() > nS.getCost())
+							r.put(nS, nS.getCost());
+						else
+							r.put(nQ, nQ.getCost());
+					}else  //New succ not present in q, add it.
+						r.put(nS, s.get(nS));
+				}
 			}
 		}
-		return q;
+		return r;
 	}
 
 	
