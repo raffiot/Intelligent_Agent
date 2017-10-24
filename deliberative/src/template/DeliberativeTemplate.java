@@ -84,7 +84,32 @@ public class DeliberativeTemplate implements DeliberativeBehavior {
 
 
 			//TEST
+			
+			
 			ArrayList<Task> res = bFS();
+			
+			System.out.println();
+			System.out.println();
+			System.out.println();
+			System.out.println();
+
+			
+			for(Task t : res)
+				System.out.println(t);
+				
+				
+				System.out.println();
+
+			System.out.println();
+
+			System.out.println();
+
+			System.out.println();
+
+			System.out.println();
+			System.out.println();
+
+			
 
 
 
@@ -106,117 +131,49 @@ public class DeliberativeTemplate implements DeliberativeBehavior {
 	}
 
 	private ArrayList<Task> bFS () { 
-		//		ArrayList<Action> actions = new ArrayList<Action>();
-		//		ArrayList<City> queue = new ArrayList<City>();
-		//		ArrayList<City> visited = new ArrayList<City>();
-		//		HashMap<City, Task> goalsDelibery = new HashMap<City, Task>();
-		//		HashMap<City, Task> goalsPick = new HashMap<City, Task>();
-		//		
-		//		for (Task t : tasksToPick) 
-		//			goalsPick.put(t.pickupCity, t);
-		//		for (Task t : tasksToDeliber) 
-		//			goalsDelibery.put(t.deliveryCity, t);
-		//		
-		//		visited.add(currentCity);
-		//		queue.add(currentCity);
-		//		
-		//		while(!queue.isEmpty()) {
-		//			City city = queue.remove(0);
-		//			
-		//			for(City c : city.neighbors()) {
-		//				if(!visited.contains(c)) {
-		//					this.currentCity = c;
-		//					visited.add(c);
-		//					queue.add(c);
-		//					actions.add(new Move(c));
-		//
-		//					if (goalsDelibery.containsKey(c)) {
-		//						Task t = goalsDelibery.get(c);
-		//						actions.add(new Delivery(t));
-		//						this.capacity += t.weight;
-		//						tasksToDeliber.remove(t);
-		//						goalsDelibery.remove(c);
-		//					}
-		//					if (goalsPick.containsKey(c) && goalsPick.get(c).weight < this.capacity) {
-		//						Task t = goalsPick.get(c);
-		//						goalsDelibery.put(t.deliveryCity, t);
-		//						actions.add(new Pickup(t));
-		//						this.capacity -= t.weight;
-		//						tasksToPick.remove(t);
-		//						goalsPick.remove(c);
-		//						tasksToDeliber.add(t);
-		//						goalsDelibery.put(t.deliveryCity, t);
-		//						//tasksTODO.remove(t); No la elimino, ahora se ha convertido en una tarea a entregar
-		//						
-		//					}
-		//				}
-		//			}
-		//		}
-		//		
-		//		return actions;
-
 		ArrayList<Task> path = new ArrayList<Task>(); //Result
-		ArrayList<Task> queue = new ArrayList<Task>();
-		ArrayList<Task> visited = new ArrayList<Task>();
-		ArrayList<Task> toDo = new ArrayList<Task>(); //All tasks that must be done
-		ArrayList<Task> toDoCopy = new ArrayList<Task>(); //All tasks that must be done
-		ArrayList<Task> delibers = new ArrayList<Task>(); //Will always have the tasks to be delibered at that moment
+		ArrayList<Task> queue = new ArrayList<Task>(); //Initial node, no task
+		HashMap<Task, Boolean> tasksToDo = new HashMap<Task, Boolean>();		
+		ArrayList<Task> toRemove;
 
-		Boolean deliber = false;
 
-		toDo.addAll(tasksToDeliber);
-		toDo.addAll(tasksToPick);
-
-		for(Task t : toDo)
-			System.out.println(t.toString());
-
-		delibers.addAll(tasksToDeliber);
-
+		for (Task t : tasksToDeliber)
+			tasksToDo.put(t, true);
+		
+		for (Task t : tasksToPick)
+			tasksToDo.put(t, false);
+		
+		queue.add(null);
 		//		visited.add(currentCity); //REMEMBER TO ADD THE FIRST CITY TO PLAN IF NEADED
-		queue.add(null); //Initial node, no task
 
 		//TESTEEEEEEEEE
 		capacity = 6;
-		int i = 0;
-		
+		for(Task t: tasksToDo.keySet())
+			System.out.println(t);
 		
 		while(!queue.isEmpty()) {
-			if (i++ > 8)
-				return null;
-			Task task = queue.remove(0);
-			ArrayList<Task> toDeliber2 = new ArrayList<Task>();
+			Task task = queue.remove(0);			
+			toRemove = new ArrayList<Task>();
 
-
-			for(Task t : toDo) {
-				if(delibers.contains(t)) //Task is at the truck
-					deliber = true;
-				if(deliber || capacity >= t.weight) { //I can pick it or deliber
-					//visited.add(t);
-					//queue.add(t); //Ya lo estoy haciendo abajo..
-					if(deliber) {
-						deliber = false;
-						delibers.remove(t);
-						toDoCopy.remove(t);
-						//toDo.remove(t);
+			for(Task t : tasksToDo.keySet()) {
+				if(tasksToDo.get(t) || capacity >= t.weight) { //I can pick it or deliber
+					if(tasksToDo.get(t)) {
+						toRemove.add(t);
 						capacity += t.weight;
 						System.out.println("Task " + t.id + "   -   type: deliber");
 					}else { //To pick
-						toDeliber2.add(t);
-						delibers.add(t);
-						toDoCopy.add(t);
+						tasksToDo.replace(t, true);
 						capacity -= t.weight;
 						System.out.println("Task " + t.id + "   -   type: pick");
 					}
 					path.add(t);
-				}else  //No he podido cogerla y entonces se queda en toDo
-					toDoCopy.add(t);
+					queue.add(t);
+				}//else  //No he podido cogerla y entonces se queda en toDo
 			}
-			toDo = new ArrayList(toDoCopy);
-			queue.addAll(toDeliber2); //ERROR
+			tasksToDo.keySet().removeAll(toRemove);
 		}
 
 		return path;
-
 	}
 
 	private Plan naivePlan(Vehicle vehicle, TaskSet tasks) {
