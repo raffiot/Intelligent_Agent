@@ -105,13 +105,26 @@ public class DeliberativeTemplate implements DeliberativeBehavior {
 				//Check for C
 				
 				HashMap<Node, Double> s = succ(n, tasksToDo);
+				System.out.println("******* succ size " + s.keySet().size());
+
 			
 				q = merge(q, s);
 				
+				System.out.println("");
+				System.out.println("");
+				System.out.println("");
+				if (n.getTask() != null)
+				System.out.println("Actual node is : " + n.getTask() + "    Type: " + n.getType() + "  Cost: " + n.getCost() + "   cost from-to: " + vehicle.getCurrentCity().distanceTo(n.getCityOfNode()));
+				System.out.println("");
 				System.out.println("Printing q at the end of each while   !");
 				for (Node nTest : q.keySet())
-					System.out.println(nTest);
-				
+					System.out.println(nTest.getTask() + "    Type: " + nTest.getType());
+				System.out.println("");
+				System.out.println("");
+				System.out.println("");
+				System.out.println("");
+				System.out.println("");
+
 				//Problem!!! Q is empty, it should have the succ
 			}
 			
@@ -192,9 +205,12 @@ public class DeliberativeTemplate implements DeliberativeBehavior {
 
 	private HashMap<Node, Double> merge(HashMap<Node, Double> q, HashMap<Node, Double> s){
 		HashMap<Node, Double> r = new HashMap<Node, Double> ();
+
+
 		for (Node nS : s.keySet()) {
+//			System.out.println(nS.getTask() + "    Type: " + nS.getType());
 			if (q.size() == 0) //Case q is empty
-				q.put(nS, s.get(nS));
+				r.put(nS, s.get(nS));
 			else {
 				for(Node nQ : q.keySet()) {
 					if (nQ.getTask().equals(nS.getTask()) && s.get(nS) == q.get(nQ)) { //We have found a new road for the same node so we compare it and if its shorter we change in q

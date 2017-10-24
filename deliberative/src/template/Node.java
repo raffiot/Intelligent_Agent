@@ -74,6 +74,10 @@ public class Node {
 	
 	public HashMap<Task, Boolean> getTasksDone(){  // I only have to return the tasks delivered
 		HashMap<Task, Boolean> tasksDone = new HashMap<Task, Boolean>(); 
+		//For me (this task)
+		if(!this.getType())
+			tasksDone.put(this.getTask(), false);
+		 
 		Node father = this.parent;
 		while(father != null) {
 			if(this.parent.getType()) 
