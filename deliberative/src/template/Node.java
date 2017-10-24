@@ -75,16 +75,22 @@ public class Node {
 	public HashMap<Task, Boolean> getTasksDone(){  // I only have to return the tasks delivered
 		HashMap<Task, Boolean> tasksDone = new HashMap<Task, Boolean>(); 
 		//For me (this task)
-		if(!this.getType())
-			tasksDone.put(this.getTask(), false);
+		if(this.getTask() != null) { //Anoto como que esto es un pick y lo he hecho
+			tasksDone.put(this.getTask(), this.getType());
 		 
-		Node father = this.parent;
-		while(father != null) {
-			if(this.parent.getType()) 
-				tasksDone.put(this.parent.task, true); //Add a delivery but task at this moment may not been delivered
-			else if (! tasksDone.containsKey(task))
-				tasksDone.put(this.parent.task, false); //Add a pick but task at this moment hasnt been delivered
-			father = father.getParent();
+			Node father = this.parent;
+					if(father.getTask() != null)
+					System.out.println("    My father is... " + father.getTask().toString());
+					else
+						System.out.println("    My father is... " + null);
+			while(father != null) {
+				if(father.getType()) 
+					tasksDone.put(father.getTask(), true); //Add a delivery but task at this moment may not been delivered
+				else if (father.getTask() != null && ! tasksDone.containsKey(father.getTask())) {
+					tasksDone.put(father.getTask(), false); //Add a pick but task at this moment hasnt been delivered
+				}
+				father = father.getParent();
+			}
 		}
 		return tasksDone;		
 	}

@@ -84,6 +84,8 @@ public class DeliberativeTemplate implements DeliberativeBehavior {
 		switch (algorithm) {
 		case ASTAR:
 			// ...
+			
+			System.out.println(vehicle.getCurrentCity());
 					plan = null; //Delete this!!
 			HashMap<Task, Boolean> allTasksASTAR =  new HashMap<Task, Boolean>(tasksToDo);
 			HashMap<Node, Double> q = new HashMap<Node, Double>	(); //Q at the notes given
@@ -98,27 +100,31 @@ public class DeliberativeTemplate implements DeliberativeBehavior {
 				//if Q.isEmpty -> failure
 				n = getMinCostNode(q);
 				q.remove(n);
-				
+								
 				if (totalTasks == n.getNumerOfTasksDone())
 					break; 
 				
 				//Check for C
 				
 				HashMap<Node, Double> s = succ(n, tasksToDo);
-				System.out.println("******* succ size " + s.keySet().size());
-
-			
+				System.out.println("___Printing succ  ! Size" + s.size());
+				for (Node nTest : s.keySet())
+					System.out.println(nTest.getTask() + "    Type: " + nTest.getType() + "  Cost: " + nTest.getCost()+ "padre " + nTest.getParent());
+				
+				System.out.println("Printing q before merge   ! Size" + q.size());
+				for (Node nTest : q.keySet())
+					System.out.println(nTest.getTask() + "    Type: " + nTest.getType() + "  Cost: " + nTest.getCost() + "padre " + nTest.getParent());
+				
+				
 				q = merge(q, s);
 				
-				System.out.println("");
-				System.out.println("");
-				System.out.println("");
+
 				if (n.getTask() != null)
-				System.out.println("Actual node is : " + n.getTask() + "    Type: " + n.getType() + "  Cost: " + n.getCost() + "   cost from-to: " + vehicle.getCurrentCity().distanceTo(n.getCityOfNode()));
+				System.out.println("Actual node is : " + n.getTask() + "    Type: " + n.getType() + "  Cost: " + n.getCost() + "   cost from-to: " + vehicle.getCurrentCity().distanceTo(n.getCityOfNode())+ "padre " + n.getParent());
 				System.out.println("");
-				System.out.println("Printing q at the end of each while   !");
+				System.out.println("Printing q at the end of each while   ! Size" + q.size());
 				for (Node nTest : q.keySet())
-					System.out.println(nTest.getTask() + "    Type: " + nTest.getType());
+					System.out.println(nTest.getTask() + "    Type: " + nTest.getType() + "  Cost: " + nTest.getCost()+ "padre " + nTest.getParent());
 				System.out.println("");
 				System.out.println("");
 				System.out.println("");
@@ -132,17 +138,30 @@ public class DeliberativeTemplate implements DeliberativeBehavior {
 			//Test
 			Node father = n;
 			System.out.println(" Parents from best action, size " + father.getNumerOfTasksDone());
-
+			ArrayList<Node> nodes = new ArrayList<Node> ();
+			
 			while (father != null) {
 				System.out.println(father.getTask() + "    Type: " + father.getType());
+				if(father.getTask() != null)
+					nodes.add(0, father);
 				father = father.getParent();
 			}
+
+			plan = new Plan(currentCity);
+			for (Node node : nodes) {
+				if(node.getType()) {  //Delivery
+					for(City c2 : currentCity.pathTo(node.getTask().deliveryCity))
+						plan.append(new Move(c2));	
+					currentCity = node.getTask().deliveryCity;
+					plan.append(new Delivery(node.getTask()));
+				}else { //Pick
+					for(City c1 : currentCity.pathTo(node.getTask().pickupCity))
+						plan.append(new Move(c1));	
+					currentCity = node.getTask().pickupCity;
+					plan.append(new Pickup(node.getTask()));
+				}
+			}
 			
-			
-			
-			//Calculate path with n
-			
-					
 			break;
 		case BFS:	
 			plan = new Plan(currentCity);
@@ -185,15 +204,35 @@ public class DeliberativeTemplate implements DeliberativeBehavior {
 	private HashMap<Node, Double> succ(Node node, HashMap<Task, Boolean> allTasks){ //All tasks must be setted at the very beggining and not changed
 		HashMap<Node, Double> res = new HashMap<Node, Double>();
 		HashMap<Task, Boolean> tasksDone = node.getTasksDone();
+		
+		System.out.println("tasks done: size" + tasksDone.size());
+		for(Task t : tasksDone.keySet())
+			System.out.println(t.toString());
+		System.out.println("tasks done ");
+
+		
+		
 		for(Task t : allTasks.keySet()) {
+
+			if (node.getTask() == null) {
+				if(allTasks.get(t))
+					res.put(new Node(t, true, node, currentCity.distanceTo(t.deliveryCity)), currentCity.distanceTo(t.deliveryCity));
+				else
+					res.put(new Node(t, false, node, currentCity.distanceTo(t.pickupCity)), currentCity.distanceTo(t.pickupCity));
+			}else
 			if (! tasksDone.containsKey(t)) { //Not delivered not picked
-				if(! allTasks.get(t)) { //Type == pick
+				if(allTasks.get(t) != null && !allTasks.get(t)) { //Type == pick
 					if (node.getTask() == null) //For initial node
-						res.put(new Node(t, false, node, 0.), currentCity.distanceTo(t.pickupCity));
+						res.put(new Node(t, false, node, currentCity.distanceTo(t.pickupCity)), currentCity.distanceTo(t.pickupCity));
 					else
 						res.put(new Node(t, false, node, node.getCityOfNode().distanceTo(t.pickupCity)), node.getCityOfNode().distanceTo(t.pickupCity));
-				}else //Type == delivery
-					res.put(new Node(t, true, node, node.getCityOfNode().distanceTo(t.deliveryCity)), node.getCityOfNode().distanceTo(t.deliveryCity));
+				}else { //Type == delivery
+					System.out.println(node.getTask() + "  " + t.deliveryCity);
+					System.out.println("························ task" + t);
+
+					res.put(new Node(t, true, node, node.getTask().deliveryCity.distanceTo(t.deliveryCity)), node.getCityOfNode().distanceTo(t.deliveryCity));
+					
+				}
 			}else { //Task is already Picked or delivered
 				if(! tasksDone.get(t)) //Picked -> have to add the delivery
 					res.put(new Node(t, true, node, node.getCityOfNode().distanceTo(t.deliveryCity)), node.getCityOfNode().distanceTo(t.deliveryCity)); 
@@ -205,22 +244,29 @@ public class DeliberativeTemplate implements DeliberativeBehavior {
 
 	private HashMap<Node, Double> merge(HashMap<Node, Double> q, HashMap<Node, Double> s){
 		HashMap<Node, Double> r = new HashMap<Node, Double> ();
-
+		boolean treated = false;
 
 		for (Node nS : s.keySet()) {
-//			System.out.println(nS.getTask() + "    Type: " + nS.getType());
+			treated = false;
 			if (q.size() == 0) //Case q is empty
 				r.put(nS, s.get(nS));
 			else {
 				for(Node nQ : q.keySet()) {
-					if (nQ.getTask().equals(nS.getTask()) && s.get(nS) == q.get(nQ)) { //We have found a new road for the same node so we compare it and if its shorter we change in q
-						if(nQ.getCost() > nS.getCost())
-							r.put(nS, nS.getCost());
-						else
-							r.put(nQ, nQ.getCost());
-					}else  //New succ not present in q, add it.
-						r.put(nS, s.get(nS));
+					if (nQ.getTask().id == nS.getTask().id && nS.getType() == nQ.getType()) { //We have found a new road for the same node so we compare it and if its shorter we change in q
+						if(q.get(nQ) > s.get(nS)) {
+							r.put(nS, s.get(nS));
+							nS.setCost(s.get(nS));
+						}
+						else {
+							r.put(nQ, q.get(nQ));
+							nQ.setCost(q.get(nQ)); //Not necessary
+						}
+						treated = true;
+						break;
+					}
 				}
+				if (!treated) 
+					r.put(nS, s.get(nS));
 			}
 		}
 		return r;
