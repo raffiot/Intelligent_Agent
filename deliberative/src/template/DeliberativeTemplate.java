@@ -98,7 +98,7 @@ public class DeliberativeTemplate implements DeliberativeBehavior {
 		return plan;
 	}
 	
-	private ArrayList<Action> bFS () {
+	private ArrayList<Action> bFS () { //
 		ArrayList<Action> actions = new ArrayList<Action>();
 		ArrayList<City> queue = new ArrayList<City>();
 		ArrayList<City> visited = new ArrayList<City>();
