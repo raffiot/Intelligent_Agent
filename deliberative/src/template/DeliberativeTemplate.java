@@ -42,8 +42,10 @@ public class DeliberativeTemplate implements DeliberativeBehavior {
 
 	City currentCity;
 	Vehicle vehicle;
-	Set<Task> tasksToDeliber;
-	Set<Task> tasksToPick;
+	Set<Task> tasksToDeliber; //Creo que sobra
+	Set<Task> tasksToPick; //Creo que sobra
+	HashMap<Task, Boolean> tasksToDo;	
+
 
 
 	@Override
@@ -81,98 +83,89 @@ public class DeliberativeTemplate implements DeliberativeBehavior {
 			ArrayList<Action> actions;
 			tasksToDeliber = vehicle.getCurrentTasks();
 			tasksToPick = tasks;
+			tasksToDo = new HashMap<Task, Boolean>();	
 
 
-			//TEST
-			
-			
-			ArrayList<Task> res = bFS();
-			
-			System.out.println();
-			System.out.println();
-			System.out.println();
-			System.out.println();
+			for (Task t : tasksToDeliber)
+				tasksToDo.put(t, true);
 
-			
-			for(Task t : res)
-				System.out.println(t);
-				
-				
-				System.out.println();
+			for (Task t : tasksToPick)
+				tasksToDo.put(t, false);
 
-			System.out.println();
+			ArrayList<Task> tasksBFS = bFS();
 
-			System.out.println();
+			plan = new Plan(currentCity);
 
-			System.out.println();
-
-			System.out.println();
-			System.out.println();
-
-			
-
-
-
-
-
-			//			while(!tasksToDeliber.isEmpty() || !tasksToPick.isEmpty()) {
-			//				actions = bFS();
-			//				for (Action a : actions) {
-			//					plan.append(a);
-			//					System.out.println(a);
-			//				}
-			//			}
-
+			for (Task t : tasksBFS) {
+				if(tasksToDo.get(t)) {  //Delivery
+					for(City c : currentCity.pathTo(t.deliveryCity))
+						plan.append(new Move(c));	
+					currentCity = t.deliveryCity;
+					plan.append(new Delivery(t));
+					tasksToDo.remove(t);
+				}else { //Pick
+					for(City c : currentCity.pathTo(t.pickupCity))
+						plan.append(new Move(c));	
+					currentCity = t.pickupCity;
+					plan.append(new Pickup(t));
+					tasksToDo.replace(t, true);
+				}
+			}
+			//			//TEST
+//			System.out.println();
+//			System.out.println();
+//			System.out.println("Tareas   ");
+//			for(Task t : tasksBFS)
+//				System.out.println(t);				
+//			System.out.println();
+//			System.out.println();
+//			System.out.println();
+//			System.out.println();
+//			System.out.println();
+//			System.out.println();
+//			for(Action a : plan)
+//				System.out.println(a);
 			break;
 		default:
 			throw new AssertionError("Should not happen.");
 		}		
-		return null; //Changed for testing
+		return plan; //Changed for testing
 	}
 
 	private ArrayList<Task> bFS () { 
 		ArrayList<Task> path = new ArrayList<Task>(); //Result
 		ArrayList<Task> queue = new ArrayList<Task>(); //Initial node, no task
-		HashMap<Task, Boolean> tasksToDo = new HashMap<Task, Boolean>();		
 		ArrayList<Task> toRemove;
+		HashMap<Task, Boolean> tasksToDo2 = new HashMap<Task, Boolean>(tasksToDo);	
 
 
-		for (Task t : tasksToDeliber)
-			tasksToDo.put(t, true);
-		
-		for (Task t : tasksToPick)
-			tasksToDo.put(t, false);
-		
 		queue.add(null);
-		//		visited.add(currentCity); //REMEMBER TO ADD THE FIRST CITY TO PLAN IF NEADED
 
 		//TESTEEEEEEEEE
-		capacity = 6;
 		for(Task t: tasksToDo.keySet())
-			System.out.println(t);
-		
+			System.out.println(t + " tipo: " + tasksToDo.get(t));
+
 		while(!queue.isEmpty()) {
 			Task task = queue.remove(0);			
 			toRemove = new ArrayList<Task>();
 
-			for(Task t : tasksToDo.keySet()) {
-				if(tasksToDo.get(t) || capacity >= t.weight) { //I can pick it or deliber
-					if(tasksToDo.get(t)) {
+			for(Task t : tasksToDo2.keySet()) {
+				if(tasksToDo2.get(t) || capacity >= t.weight) { //I can pick it or deliber
+					if(tasksToDo2.get(t)) {
 						toRemove.add(t);
 						capacity += t.weight;
-						System.out.println("Task " + t.id + "   -   type: deliber");
+//						System.out.println("Task " + t.id + "   -   type: deliber");
 					}else { //To pick
-						tasksToDo.replace(t, true);
+						tasksToDo2.replace(t, true);
 						capacity -= t.weight;
-						System.out.println("Task " + t.id + "   -   type: pick");
+//						System.out.println("Task " + t.id + "   -   type: pick");
 					}
 					path.add(t);
 					queue.add(t);
-				}//else  //No he podido cogerla y entonces se queda en toDo
+				} //No he podido cogerla y entonces se queda en toDo
 			}
-			tasksToDo.keySet().removeAll(toRemove);
+			tasksToDo2.keySet().removeAll(toRemove);
 		}
-
 		return path;
 	}
 
