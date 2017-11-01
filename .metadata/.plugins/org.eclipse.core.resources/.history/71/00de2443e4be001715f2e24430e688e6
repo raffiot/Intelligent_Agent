@@ -1,0 +1,7 @@
+package template;
+
+import logist.simulation.Vehicle;
+import java.util.*;
+public class CentralizedClass {
+	HashMap<Vehicle,LinkedList<TaskClass>> nextTask;
+}
