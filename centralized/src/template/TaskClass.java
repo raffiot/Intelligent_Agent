@@ -38,4 +38,12 @@ public class TaskClass {
 			return task.deliveryCity;
 		}
 	}
+	
+	public Task getTask(){
+		return task;
+	}
+	
+	public boolean sameTask(TaskClass tc){
+		return tc.getTask() == this.task;
+	}
 }

@@ -9,5 +9,6 @@
 	<classpathentry kind="lib" path="C:/path_to_the_libraries/jsolver.jar"/>
 	<classpathentry kind="lib" path="C:/path_to_the_libraries/plot.jar"/>
 	<classpathentry kind="lib" path="C:/path_to_the_libraries/repast.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Raphael/Desktop/EPFL/Intelligent_Agent/reactive/logistics/logist.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

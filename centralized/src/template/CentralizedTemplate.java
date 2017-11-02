@@ -4,8 +4,8 @@ package template;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import logist.LogistSettings;
 
+import logist.LogistSettings;
 import logist.Measures;
 import logist.behavior.AuctionBehavior;
 import logist.behavior.CentralizedBehavior;
@@ -32,11 +32,13 @@ public class CentralizedTemplate implements CentralizedBehavior {
     private Agent agent;
     private long timeout_setup;
     private long timeout_plan;
+    private double pValue;
     
     @Override
     public void setup(Topology topology, TaskDistribution distribution,
             Agent agent) {
         
+    	pValue = 0.4;
         // this code is used to get the timeouts
         LogistSettings ls = null;
         try {
@@ -100,4 +102,67 @@ public class CentralizedTemplate implements CentralizedBehavior {
         }
         return plan;
     }
+    
+	public CentralizedClass createInitialSolution(TaskSet tasks, List<Vehicle> vehicles) throws Exception{
+		CentralizedClass result = new CentralizedClass(vehicles);
+		/**
+		 * For each task we try to put it in each vehicle until one is enough big to carry it.
+		 * If no vehicle is enough big to carry task t we throw exception
+		 */
+		for(Task t : tasks){
+			boolean taskPut = false;
+			int index = -1;
+			while(!taskPut){
+				index++;
+				if(index == vehicles.size()){
+					System.out.println("Error the task is too big to be carry by any vehicle !");
+					throw new Exception("Error the task is too big to be carry by any vehicle !");
+				}
+				taskPut = result.putTask(t, vehicles.get(index));				
+			}
+		}
+		return result;
+	}
+	
+	public CentralizedClass localChoice(CentralizedClass aOld, List<CentralizedClass> n){
+		CentralizedClass abest = null;
+		int minCost = Integer.MAX_VALUE;
+		for(CentralizedClass cc : n){
+			int actualCost = cc.computeCost();
+			if(minCost > actualCost){
+				minCost = actualCost;
+				abest = cc;
+			}
+		}
+		
+		if(Math.random() > pValue){
+			return aOld;
+		}
+		else{
+			return abest;
+		}
+	}
+	
+	//If it wasn't possible to assign the task to vehicle v2 we return null, to be treated in chooseNeighbours;
+	public CentralizedClass changingVehicle(CentralizedClass a, Vehicle v1, Vehicle v2){
+		CentralizedClass newA = a.clone();
+		TaskClass tc = newA.removeFirst(v1);
+		if(!newA.addFirst(tc, v2)){
+			return null;
+		}
+		return newA;
+	}
+	
+	//If it wasn't possible to swap tasks we return null, to be treated in chooseNeighbours;
+	public CentralizedClass changingTaskOrder(CentralizedClass a, Vehicle v, int indexOld, int indexNew){
+		CentralizedClass newA = a.clone();
+		if(!newA.swapTask(v, indexOld, indexNew)){
+			return null;
+		}
+		return newA;
+	}
+	
+	public List<CentralizedClass> ChooseNeighbours(CentralizedClass a){
+		List
+	}
 }
