@@ -1,4 +1,0 @@
-INDEX VERSION 1.127+C:\Users\Raphael\Desktop\EPFL\Intelligent_Agent\.metadata\.plugins\org.eclipse.jdt.core
-4257325822.index
-2842149806.index
-2328269416.index
