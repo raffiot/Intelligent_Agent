@@ -9,6 +9,10 @@
 	<classpathentry kind="lib" path="C:/path_to_the_libraries/jsolver.jar"/>
 	<classpathentry kind="lib" path="C:/path_to_the_libraries/plot.jar"/>
 	<classpathentry kind="lib" path="C:/path_to_the_libraries/repast.jar"/>
+<<<<<<< HEAD
 	<classpathentry kind="lib" path="C:/Users/advif/Desktop/7 Sem/Intelligent Agents - 430/gitHub/Intelligent_Agent/logist.jar"/>
+=======
+	<classpathentry kind="lib" path="C:/Users/Raphael/Desktop/EPFL/Intelligent_Agent/reactive/logistics/logist.jar"/>
+>>>>>>> c90e505d9be7d76fb47ec697779d5a7d06e9e7c4
 	<classpathentry kind="output" path="bin"/>
 </classpath>
