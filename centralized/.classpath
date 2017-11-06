@@ -2,12 +2,12 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-	<classpathentry kind="lib" path="C:/Users/Raphael/Desktop/EPFL/Intelligent_Agent/reactive/logistics/logist.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Raphael/Desktop/EPFL/Intelligent_Agent/reactive/logistics/lib/colt.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Raphael/Desktop/EPFL/Intelligent_Agent/reactive/logistics/lib/commons-math-1.1.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Raphael/Desktop/EPFL/Intelligent_Agent/reactive/logistics/lib/jdom.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Raphael/Desktop/EPFL/Intelligent_Agent/reactive/logistics/lib/jsolver.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Raphael/Desktop/EPFL/Intelligent_Agent/reactive/logistics/lib/plot.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Raphael/Desktop/EPFL/Intelligent_Agent/reactive/logistics/lib/repast.jar"/>
+	<classpathentry kind="lib" path="C:/Users/advif/Desktop/7 Sem/Intelligent Agents - 430/gitHub/Intelligent_Agent/logist.jar"/>
+	<classpathentry kind="lib" path="C:/Users/advif/Desktop/7 Sem/Intelligent Agents - 430/gitHub/Intelligent_Agent/lib/colt.jar"/>
+	<classpathentry kind="lib" path="C:/Users/advif/Desktop/7 Sem/Intelligent Agents - 430/gitHub/Intelligent_Agent/lib/commons-math-1.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/advif/Desktop/7 Sem/Intelligent Agents - 430/gitHub/Intelligent_Agent/lib/jdom.jar"/>
+	<classpathentry kind="lib" path="C:/Users/advif/Desktop/7 Sem/Intelligent Agents - 430/gitHub/Intelligent_Agent/lib/jsolver.jar"/>
+	<classpathentry kind="lib" path="C:/Users/advif/Desktop/7 Sem/Intelligent Agents - 430/gitHub/Intelligent_Agent/lib/plot.jar"/>
+	<classpathentry kind="lib" path="C:/Users/advif/Desktop/7 Sem/Intelligent Agents - 430/gitHub/Intelligent_Agent/lib/repast.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

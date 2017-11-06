@@ -3,7 +3,6 @@ package template;
 import logist.plan.Plan;
 import logist.simulation.Vehicle;
 import logist.task.Task;
-import logist.task.TaskSet;
 import logist.topology.Topology.City;
 
 import java.util.*;

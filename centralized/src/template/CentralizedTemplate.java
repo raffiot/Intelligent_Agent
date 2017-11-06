@@ -27,7 +27,7 @@ import logist.topology.Topology.City;
 @SuppressWarnings("unused")
 public class CentralizedTemplate implements CentralizedBehavior {
 
-	public static final int terminateCondition = 10;
+	public static final int terminateCondition = 10000;
 	
     private Topology topology;
     private TaskDistribution distribution;
@@ -179,16 +179,18 @@ public class CentralizedTemplate implements CentralizedBehavior {
 		List<CentralizedClass> n = new ArrayList<CentralizedClass>();
 		boolean bool = true;
 		Vehicle vi = null;
-		int rand = (int) Math.random()* vehicles.size();
+		int rand =  (int)Math.floor(Math.random()*(vehicles.size()));
+
 		while(bool){
-			vi = vehicles.get(rand); //check if the number of vehicle return by agent is the good number.
+			vi = vehicles.get(rand);
 			if(a.getNbTask(vi) > 0){
 				bool = false;
 			}
 			else{
-				rand = rand++ % vehicles.size();
+				rand = ++rand % vehicles.size();
 			}
 		}
+
 		/**
 		for(Plan p : a.computePlan(vehicles)){
 			System.out.println(p);
@@ -222,12 +224,13 @@ public class CentralizedTemplate implements CentralizedBehavior {
 			iteration++;
 			CentralizedClass aOld = a;
 			List<CentralizedClass> n = ChooseNeighbours(aOld, vehicles);
+			//Infinite loop inside chooseNeighbours
+			
 			a = localChoice(aOld, n);
 			/**
 			for(Plan p : a.computePlan(vehicles)){
 				System.out.println(p);
 			}*/
-			System.out.println(iteration);
 		}
 		
 		return a;
