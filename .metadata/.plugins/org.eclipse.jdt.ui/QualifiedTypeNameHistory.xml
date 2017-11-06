@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<qualifiedTypeNameHistroy>
+<fullyQualifiedTypeName name="logist.task.TaskSet"/>
+<fullyQualifiedTypeName name="logist.task.Task"/>
+<fullyQualifiedTypeName name="template.TaskClass"/>
+<fullyQualifiedTypeName name="template.CentralizedClass"/>
+<fullyQualifiedTypeName name="logist.plan.Plan"/>
+<fullyQualifiedTypeName name="java.lang.System"/>
+</qualifiedTypeNameHistroy>

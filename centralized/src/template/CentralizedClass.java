@@ -1,5 +1,6 @@
 package template;
 
+import logist.plan.Plan;
 import logist.simulation.Vehicle;
 import logist.task.Task;
 import logist.task.TaskSet;
@@ -21,6 +22,10 @@ public class CentralizedClass {
 		}
 	}
 	
+	public HashMap<Vehicle, LinkedList<TaskClass>> getNextTask() {
+		return nextTask;
+	}
+	
 	public CentralizedClass(HashMap<Vehicle,LinkedList<TaskClass>> hm){
 		nextTask = hm;
 	}
@@ -32,8 +37,8 @@ public class CentralizedClass {
 	
 	public int getLoad(Vehicle v, int time){
 		if(time < 0){
-			System.out.println("error when calling method getLoad in CentralizedClass");
-			return -1;
+			System.out.println("time ==0");
+			return 0;
 		}
 		LinkedList<TaskClass> ll = nextTask.get(v);
 		if(ll.isEmpty()){
@@ -142,7 +147,7 @@ public class CentralizedClass {
 			return true;
 		}
 		else{
-			for(int i = indexOld+1; i < indexNew; i++){		
+			for(int i = indexOld+1; i <= indexNew; i++){		
 				if(ll.get(i).sameTask(tc)){
 					return false;
 				}
@@ -151,5 +156,41 @@ public class CentralizedClass {
 			ll.add(indexNew, tc);
 			return true;
 		}
+	}
+	
+	public int getNbVehicle(){
+		return nextTask.keySet().size();
+	}
+	
+	public int getNbTask(Vehicle v){
+		return nextTask.get(v).size();
+	}
+	
+	public TaskClass getFirstTask(Vehicle v){
+		return nextTask.get(v).getFirst();
+	}
+	
+	public List<Plan> computePlan(List<Vehicle> vehicles){
+		List<Plan> plans = new ArrayList<Plan>();
+		for(Vehicle v : vehicles){
+			City currentCity = v.getCurrentCity();
+			Plan p = new Plan(currentCity);
+			LinkedList<TaskClass> ll = nextTask.get(v);
+			for(TaskClass tc : ll){
+				for(City city: currentCity.pathTo(tc.getCity())){
+					
+					p.appendMove(city);
+				}
+				if(tc.getType() == TaskClass.pickup){
+					p.appendPickup(tc.getTask());
+				}
+				else{
+					p.appendDelivery(tc.getTask());
+				}
+				currentCity = tc.getCity();
+			}
+			plans.add(p);
+		}
+		return plans;
 	}
 }

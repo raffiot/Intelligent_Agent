@@ -27,6 +27,8 @@ import logist.topology.Topology.City;
 @SuppressWarnings("unused")
 public class CentralizedTemplate implements CentralizedBehavior {
 
+	public static final int terminateCondition = 10;
+	
     private Topology topology;
     private TaskDistribution distribution;
     private Agent agent;
@@ -63,17 +65,22 @@ public class CentralizedTemplate implements CentralizedBehavior {
         long time_start = System.currentTimeMillis();
         
 //		System.out.println("Agent " + agent.id() + " has tasks " + tasks);
-        Plan planVehicle1 = naivePlan(vehicles.get(0), tasks);
-
-        List<Plan> plans = new ArrayList<Plan>();
-        plans.add(planVehicle1);
-        while (plans.size() < vehicles.size()) {
-            plans.add(Plan.EMPTY);
-        }
+        
+        CentralizedClass result = null;
+		try {
+			result = sLS(tasks, vehicles, terminateCondition);
+		} catch (Exception e) {
+			System.exit(-1);
+		}
         
         long time_end = System.currentTimeMillis();
         long duration = time_end - time_start;
         System.out.println("The plan was generated in "+duration+" milliseconds.");
+        
+        List<Plan> plans = result.computePlan(vehicles);
+		for(Plan p : plans){
+			System.out.println(p);
+		}
         
         return plans;
     }
@@ -129,6 +136,11 @@ public class CentralizedTemplate implements CentralizedBehavior {
 		int minCost = Integer.MAX_VALUE;
 		for(CentralizedClass cc : n){
 			int actualCost = cc.computeCost();
+			/**
+			for(Plan p : cc.computePlan(agent.vehicles())){
+				System.out.println(p);
+			}
+			System.out.println(actualCost);*/
 			if(minCost > actualCost){
 				minCost = actualCost;
 				abest = cc;
@@ -150,6 +162,7 @@ public class CentralizedTemplate implements CentralizedBehavior {
 		if(!newA.addFirst(tc, v2)){
 			return null;
 		}
+		
 		return newA;
 	}
 	
@@ -162,7 +175,61 @@ public class CentralizedTemplate implements CentralizedBehavior {
 		return newA;
 	}
 	
-	public List<CentralizedClass> ChooseNeighbours(CentralizedClass a){
-		List
+	public List<CentralizedClass> ChooseNeighbours(CentralizedClass a, List<Vehicle> vehicles){
+		List<CentralizedClass> n = new ArrayList<CentralizedClass>();
+		boolean bool = true;
+		Vehicle vi = null;
+		int rand = (int) Math.random()* vehicles.size();
+		while(bool){
+			vi = vehicles.get(rand); //check if the number of vehicle return by agent is the good number.
+			if(a.getNbTask(vi) > 0){
+				bool = false;
+			}
+			else{
+				rand = rand++ % vehicles.size();
+			}
+		}
+		/**
+		for(Plan p : a.computePlan(vehicles)){
+			System.out.println(p);
+		}*/
+		for(Vehicle v : vehicles){
+			if(!v.equals(vi)){
+				CentralizedClass newA = changingVehicle(a,vi,v);
+				if(newA != null){
+					n.add(newA);
+				}
+			}
+		}
+		int length = a.getNbTask(vi);
+		if(length >=4){
+			for(int tIdx1 = 0; tIdx1 < length-1; tIdx1++){
+				for(int tIdx2=tIdx1+1; tIdx2 < length; tIdx2++){
+					CentralizedClass newA = changingTaskOrder(a,vi,tIdx1,tIdx2);
+					if(newA != null){
+						n.add(newA);
+					}
+				}
+			}
+		}
+		return n;
+	}
+	
+	public CentralizedClass sLS(TaskSet tasks, List<Vehicle> vehicles, int tCondition) throws Exception{
+		CentralizedClass a = createInitialSolution(tasks, vehicles);
+		int iteration =0;
+		while(iteration < tCondition){
+			iteration++;
+			CentralizedClass aOld = a;
+			List<CentralizedClass> n = ChooseNeighbours(aOld, vehicles);
+			a = localChoice(aOld, n);
+			/**
+			for(Plan p : a.computePlan(vehicles)){
+				System.out.println(p);
+			}*/
+			System.out.println(iteration);
+		}
+		
+		return a;
 	}
 }
