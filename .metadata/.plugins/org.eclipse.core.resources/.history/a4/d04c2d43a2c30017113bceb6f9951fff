@@ -40,7 +40,7 @@ public class CentralizedTemplate implements CentralizedBehavior {
     public void setup(Topology topology, TaskDistribution distribution,
             Agent agent) {
         
-    	pValue = 0.5;
+    	pValue = 0.4;
         // this code is used to get the timeouts
         LogistSettings ls = null;
         try {
@@ -156,25 +156,11 @@ public class CentralizedTemplate implements CentralizedBehavior {
 				abest = cc;
 			}
 		}
-		int cost = 0;
-		for(Plan p : aOld.computePlan(agent.vehicles())){
-			cost+= p.totalDistance();
-		}
-		System.out.println("cost with a old "+cost);
-		cost = 0;
-		for(Plan p : abest.computePlan(agent.vehicles())){
-			cost+= p.totalDistance();
-		}
-		System.out.println("cost with a best "+cost);
-		
-		
 		
 		if(Math.random() > pValue){
-			System.out.println("AOLD");
 			return aOld;
 		}
 		else{
-			System.out.println("ANEW");
 			return abest;
 		}
 	}

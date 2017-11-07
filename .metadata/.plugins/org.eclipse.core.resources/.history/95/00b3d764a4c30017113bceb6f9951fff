@@ -156,25 +156,11 @@ public class CentralizedTemplate implements CentralizedBehavior {
 				abest = cc;
 			}
 		}
-		int cost = 0;
-		for(Plan p : aOld.computePlan(agent.vehicles())){
-			cost+= p.totalDistance();
-		}
-		System.out.println("cost with a old "+cost);
-		cost = 0;
-		for(Plan p : abest.computePlan(agent.vehicles())){
-			cost+= p.totalDistance();
-		}
-		System.out.println("cost with a best "+cost);
-		
-		
 		
 		if(Math.random() > pValue){
-			System.out.println("AOLD");
 			return aOld;
 		}
 		else{
-			System.out.println("ANEW");
 			return abest;
 		}
 	}
@@ -243,6 +229,9 @@ public class CentralizedTemplate implements CentralizedBehavior {
 	
 	public CentralizedClass sLS(TaskSet tasks, List<Vehicle> vehicles, int tCondition) throws Exception{
 		CentralizedClass a = createInitialSolution(tasks, vehicles);
+		for(Plan p : a.computePlan(vehicles)){
+			System.out.println(p);
+		}
 		int iteration =0;
 		while(iteration < tCondition){
 			iteration++;

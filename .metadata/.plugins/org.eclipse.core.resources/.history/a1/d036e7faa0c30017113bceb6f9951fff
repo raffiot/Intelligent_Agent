@@ -40,7 +40,7 @@ public class CentralizedTemplate implements CentralizedBehavior {
     public void setup(Topology topology, TaskDistribution distribution,
             Agent agent) {
         
-    	pValue = 0.5;
+    	pValue = 0.4;
         // this code is used to get the timeouts
         LogistSettings ls = null;
         try {
@@ -116,7 +116,6 @@ public class CentralizedTemplate implements CentralizedBehavior {
 		 * For each task we try to put it in each vehicle until one is enough big to carry it.
 		 * If no vehicle is enough big to carry task t we throw exception
 		 */
-		/**
 		for(Task t : tasks){
 			boolean taskPut = false;
 			int index = -1;
@@ -127,15 +126,6 @@ public class CentralizedTemplate implements CentralizedBehavior {
 					throw new Exception("Error the task is too big to be carry by any vehicle !");
 				}
 				taskPut = result.putTask(t, vehicles.get(index));				
-			}
-		}*/
-		for(Task t : tasks){
-			boolean taskPut = false;
-			int index = (int)Math.floor(Math.random()*(vehicles.size()));
-			while(!taskPut){		
-				taskPut = result.putTask(t, vehicles.get(index));	
-				if(!taskPut)
-					index =(int)Math.floor(Math.random()*(vehicles.size()));
 			}
 		}
 		return result;
@@ -156,25 +146,11 @@ public class CentralizedTemplate implements CentralizedBehavior {
 				abest = cc;
 			}
 		}
-		int cost = 0;
-		for(Plan p : aOld.computePlan(agent.vehicles())){
-			cost+= p.totalDistance();
-		}
-		System.out.println("cost with a old "+cost);
-		cost = 0;
-		for(Plan p : abest.computePlan(agent.vehicles())){
-			cost+= p.totalDistance();
-		}
-		System.out.println("cost with a best "+cost);
-		
-		
 		
 		if(Math.random() > pValue){
-			System.out.println("AOLD");
 			return aOld;
 		}
 		else{
-			System.out.println("ANEW");
 			return abest;
 		}
 	}
