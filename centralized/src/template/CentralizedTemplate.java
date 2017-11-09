@@ -40,8 +40,7 @@ public class CentralizedTemplate implements CentralizedBehavior {
     public void setup(Topology topology, TaskDistribution distribution,
             Agent agent) {
         
-    	pValue = 0.4;
-        // this code is used to get the timeouts
+    	pValue = 0.1;
         LogistSettings ls = null;
         try {
             ls = Parsers.parseSettings("config\\settings_default.xml");
@@ -50,6 +49,7 @@ public class CentralizedTemplate implements CentralizedBehavior {
             System.out.println("There was a problem loading the configuration file.");
         }
         
+        // this code is used to get the timeouts
         // the setup method cannot last more than timeout_setup milliseconds
         timeout_setup = ls.get(LogistSettings.TimeoutKey.SETUP);
         // the plan method cannot execute more than timeout_plan milliseconds
@@ -64,12 +64,14 @@ public class CentralizedTemplate implements CentralizedBehavior {
     public List<Plan> plan(List<Vehicle> vehicles, TaskSet tasks) {
         long time_start = System.currentTimeMillis();
         
-//		System.out.println("Agent " + agent.id() + " has tasks " + tasks);
+//		System.out.println("Agent " + agent.id() + " has tasks " + tasks); 
         
         CentralizedClass result = null;
-		try {
+        
+       try {
 			result = sLS(tasks, vehicles, terminateCondition);
 		} catch (Exception e) {
+            System.out.println("No plan generated.");
 			System.exit(-1);
 		}
         
@@ -77,12 +79,14 @@ public class CentralizedTemplate implements CentralizedBehavior {
         long duration = time_end - time_start;
         System.out.println("The plan was generated in "+duration+" milliseconds.");
         
-        List<Plan> plans = result.computePlan(vehicles);
-		for(Plan p : plans){
-			System.out.println(p);
-		}
+//        List<Plan> plans = result.computePlan(vehicles);
+//		for(Plan p : plans){
+//			System.out.println(p);
+//		}
+		
+        System.out.println(result.computeCost());
         
-        return plans;
+        return result.computePlan(vehicles);
     }
 
     private Plan naivePlan(Vehicle vehicle, TaskSet tasks) {
@@ -116,16 +120,15 @@ public class CentralizedTemplate implements CentralizedBehavior {
 		 * For each task we try to put it in each vehicle until one is enough big to carry it.
 		 * If no vehicle is enough big to carry task t we throw exception
 		 */
+		
+		int vSize = vehicles.size();
 		for(Task t : tasks){
 			boolean taskPut = false;
-			int index = -1;
-			while(!taskPut){
-				index++;
-				if(index == vehicles.size()){
-					System.out.println("Error the task is too big to be carry by any vehicle !");
-					throw new Exception("Error the task is too big to be carry by any vehicle !");
-				}
-				taskPut = result.putTask(t, vehicles.get(index));				
+			int index = (int)Math.floor(Math.random()*(vehicles.size()));			
+			while(!taskPut){		
+				taskPut = result.putTask(t, vehicles.get(index));	
+				if(!taskPut)
+					index =(int)Math.floor(Math.random()*(vehicles.size()));
 			}
 		}
 		return result;
@@ -136,11 +139,6 @@ public class CentralizedTemplate implements CentralizedBehavior {
 		int minCost = Integer.MAX_VALUE;
 		for(CentralizedClass cc : n){
 			int actualCost = cc.computeCost();
-			/**
-			for(Plan p : cc.computePlan(agent.vehicles())){
-				System.out.println(p);
-			}
-			System.out.println(actualCost);*/
 			if(minCost > actualCost){
 				minCost = actualCost;
 				abest = cc;
@@ -169,6 +167,7 @@ public class CentralizedTemplate implements CentralizedBehavior {
 	//If it wasn't possible to swap tasks we return null, to be treated in chooseNeighbours;
 	public CentralizedClass changingTaskOrder(CentralizedClass a, Vehicle v, int indexOld, int indexNew){
 		CentralizedClass newA = a.clone();
+
 		if(!newA.swapTask(v, indexOld, indexNew)){
 			return null;
 		}
@@ -181,6 +180,7 @@ public class CentralizedTemplate implements CentralizedBehavior {
 		Vehicle vi = null;
 		int rand =  (int)Math.floor(Math.random()*(vehicles.size()));
 
+		
 		while(bool){
 			vi = vehicles.get(rand);
 			if(a.getNbTask(vi) > 0){
@@ -191,10 +191,8 @@ public class CentralizedTemplate implements CentralizedBehavior {
 			}
 		}
 
-		/**
-		for(Plan p : a.computePlan(vehicles)){
-			System.out.println(p);
-		}*/
+
+
 		for(Vehicle v : vehicles){
 			if(!v.equals(vi)){
 				CentralizedClass newA = changingVehicle(a,vi,v);
@@ -203,6 +201,7 @@ public class CentralizedTemplate implements CentralizedBehavior {
 				}
 			}
 		}
+		      
 		int length = a.getNbTask(vi);
 		if(length >=4){
 			for(int tIdx1 = 0; tIdx1 < length-1; tIdx1++){
@@ -211,26 +210,26 @@ public class CentralizedTemplate implements CentralizedBehavior {
 					if(newA != null){
 						n.add(newA);
 					}
+					
 				}
 			}
 		}
+		
 		return n;
 	}
 	
 	public CentralizedClass sLS(TaskSet tasks, List<Vehicle> vehicles, int tCondition) throws Exception{
+		
 		CentralizedClass a = createInitialSolution(tasks, vehicles);
+     
 		int iteration =0;
 		while(iteration < tCondition){
 			iteration++;
 			CentralizedClass aOld = a;
-			List<CentralizedClass> n = ChooseNeighbours(aOld, vehicles);
-			//Infinite loop inside chooseNeighbours
 			
+			List<CentralizedClass> n = ChooseNeighbours(aOld, vehicles);
+
 			a = localChoice(aOld, n);
-			/**
-			for(Plan p : a.computePlan(vehicles)){
-				System.out.println(p);
-			}*/
 		}
 		
 		return a;

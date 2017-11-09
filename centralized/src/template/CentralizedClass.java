@@ -36,7 +36,7 @@ public class CentralizedClass {
 	
 	public int getLoad(Vehicle v, int time){
 		if(time < 0){
-			System.out.println("time ==0");
+//			System.out.println("time ==0");
 			return 0;
 		}
 		LinkedList<TaskClass> ll = nextTask.get(v);

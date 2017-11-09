@@ -6,13 +6,59 @@
 			<vehicle name="Vehicle 1"/>
 			<vehicle name="Vehicle 2"/>
 			<vehicle name="Vehicle 3"/>
-			<vehicle name="Vehicle 4"/>
-			<vehicle name="Vehicle 5"/>
-			<vehicle name="Vehicle 6"/>
-			<vehicle name="Vehicle 7"/>
-			<vehicle name="Vehicle 8"/>
-			<vehicle name="Vehicle 8"/>
-			<vehicle name="Vehicle 9"/>
-			<vehicle name="Vehicle 10"/>
-			<vehicle name="Vehicle 11"/>
-			<vehicle name="Vehicle 12"/>
+		</agent>
+	</agents>
+	<rounds>
+		<round id="1">
+			<tasks>
+				<task id="0" pickup="Bern" delivery="Fribourg" weight="3" reward="97960"/>
+				<task id="1" pickup="Basel" delivery="Zürich" weight="3" reward="83688"/>
+				<task id="2" pickup="Genève" delivery="Luzern" weight="3" reward="18448"/>
+				<task id="3" pickup="St-Gallen" delivery="Thun" weight="3" reward="40875"/>
+				<task id="4" pickup="Lausanne" delivery="St-Gallen" weight="3" reward="18448"/>
+				<task id="5" pickup="Aarau" delivery="Zürich" weight="3" reward="95921"/>
+				<task id="6" pickup="Fribourg" delivery="Lausanne" weight="3" reward="87766"/>
+				<task id="7" pickup="Genève" delivery="Aarau" weight="3" reward="36797"/>
+				<task id="8" pickup="Neuchâtel" delivery="Basel" weight="3" reward="67378"/>
+				<task id="9" pickup="Lausanne" delivery="Neuchâtel" weight="3" reward="87766"/>
+				<task id="10" pickup="Neuchâtel" delivery="Zürich" weight="3" reward="61262"/>
+				<task id="11" pickup="Fribourg" delivery="Sion" weight="3" reward="65340"/>
+				<task id="12" pickup="Genève" delivery="Fribourg" weight="3" reward="69417"/>
+				<task id="13" pickup="Neuchâtel" delivery="Sion" weight="3" reward="63301"/>
+				<task id="14" pickup="Fribourg" delivery="St-Gallen" weight="3" reward="38836"/>
+				<task id="15" pickup="Genève" delivery="Fribourg" weight="3" reward="69417"/>
+				<task id="16" pickup="Fribourg" delivery="Neuchâtel" weight="3" reward="85727"/>
+				<task id="17" pickup="Neuchâtel" delivery="Basel" weight="3" reward="67378"/>
+				<task id="18" pickup="Lausanne" delivery="Neuchâtel" weight="3" reward="87766"/>
+				<task id="19" pickup="Thun" delivery="Luzern" weight="3" reward="59223"/>
+				<task id="20" pickup="Bern" delivery="Neuchâtel" weight="3" reward="95921"/>
+				<task id="21" pickup="Bern" delivery="Genève" weight="3" reward="59223"/>
+				<task id="22" pickup="Luzern" delivery="Zürich" weight="3" reward="93882"/>
+				<task id="23" pickup="Zürich" delivery="Lausanne" weight="3" reward="42913"/>
+				<task id="24" pickup="Thun" delivery="Zürich" weight="3" reward="65340"/>
+				<task id="25" pickup="Zürich" delivery="Neuchâtel" weight="3" reward="61262"/>
+				<task id="26" pickup="St-Gallen" delivery="Thun" weight="3" reward="40875"/>
+				<task id="27" pickup="Thun" delivery="Bern" weight="3" reward="99999"/>
+				<task id="28" pickup="Neuchâtel" delivery="Thun" weight="3" reward="87766"/>
+				<task id="29" pickup="Lausanne" delivery="Fribourg" weight="3" reward="87766"/>
+			</tasks>
+			<events>
+				<event id="0" time="0" vehicle="Vehicle 1" pickup="12"/>
+				<event id="1" time="0" vehicle="Vehicle 2" pickup="4"/>
+				<event id="2" time="0" vehicle="Vehicle 3" move="Basel"/>
+				<event id="3" time="299999990" vehicle="Vehicle 1" pickup="7"/>
+				<event id="4" time="299999990" vehicle="Vehicle 2" move="Fribourg"/>
+				<event id="5" time="599999971" vehicle="Vehicle 1" move="Lausanne"/>
+			</events>
+		</round>
+	</rounds>
+	<statistics>
+		<stat rank="1" agent="centralized">
+			<total-tasks value="30"/>
+			<total-distance value="330.0"/>
+			<total-cost value="1650"/>
+			<total-reward value="0"/>
+			<total-profit value="-1650"/>
+		</stat>
+	</statistics>
+</history>
