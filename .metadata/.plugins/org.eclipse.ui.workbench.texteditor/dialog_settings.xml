@@ -9,6 +9,7 @@
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
 			<item value="print"/>
+			<item value="toStr"/>
 			<item value="kdjjfqljs"/>
 			<item value="createInitialSolution"/>
 		</list>

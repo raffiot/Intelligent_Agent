@@ -7,3 +7,31 @@
 			<vehicle name="Vehicle 2"/>
 			<vehicle name="Vehicle 3"/>
 			<vehicle name="Vehicle 4"/>
+		</agent>
+	</agents>
+	<rounds>
+		<round id="1">
+			<tasks>
+				<task id="0" pickup="Bern" delivery="Fribourg" weight="15" reward="97960"/>
+				<task id="1" pickup="Basel" delivery="Zürich" weight="15" reward="83688"/>
+				<task id="2" pickup="Genève" delivery="Luzern" weight="15" reward="18448"/>
+				<task id="3" pickup="St-Gallen" delivery="Thun" weight="15" reward="40875"/>
+			</tasks>
+			<events>
+				<event id="0" time="0" vehicle="Vehicle 3" move="Thun"/>
+				<event id="1" time="1333333269" vehicle="Vehicle 3" move="Bern"/>
+				<event id="2" time="1777777691" vehicle="Vehicle 3" move="Aarau"/>
+				<event id="3" time="2999999866" vehicle="Vehicle 3" move="Zürich"/>
+			</events>
+		</round>
+	</rounds>
+	<statistics>
+		<stat rank="1" agent="centralized">
+			<total-tasks value="4"/>
+			<total-distance value="330.0"/>
+			<total-cost value="1650"/>
+			<total-reward value="0"/>
+			<total-profit value="-1650"/>
+		</stat>
+	</statistics>
+</history>

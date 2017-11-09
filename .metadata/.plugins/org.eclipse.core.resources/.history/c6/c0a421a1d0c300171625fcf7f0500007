@@ -36,6 +36,7 @@ public class CentralizedClass {
 	
 	public int getLoad(Vehicle v, int time){
 		if(time < 0){
+			System.out.println("time ==0");
 			return 0;
 		}
 		LinkedList<TaskClass> ll = nextTask.get(v);
@@ -43,7 +44,6 @@ public class CentralizedClass {
 			//There is no task assigned to this vehicle yet
 			return 0;
 		}
-		
 		int size = ll.size();
 		if(size < time){
 			//Vehicle v has already pickup and deliver all it's task at this time

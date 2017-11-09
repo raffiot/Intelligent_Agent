@@ -27,16 +27,20 @@ import logist.topology.Topology.City;
 @SuppressWarnings("unused")
 public class CentralizedTemplate implements CentralizedBehavior {
 
+	public static final int terminateCondition = 10000;
+	
     private Topology topology;
     private TaskDistribution distribution;
     private Agent agent;
     private long timeout_setup;
     private long timeout_plan;
+    private double pValue;
     
     @Override
     public void setup(Topology topology, TaskDistribution distribution,
             Agent agent) {
         
+    	pValue = 0.5;
         // this code is used to get the timeouts
         LogistSettings ls = null;
         try {
@@ -61,17 +65,22 @@ public class CentralizedTemplate implements CentralizedBehavior {
         long time_start = System.currentTimeMillis();
         
 //		System.out.println("Agent " + agent.id() + " has tasks " + tasks);
-        Plan planVehicle1 = naivePlan(vehicles.get(0), tasks);
-
-        List<Plan> plans = new ArrayList<Plan>();
-        plans.add(planVehicle1);
-        while (plans.size() < vehicles.size()) {
-            plans.add(Plan.EMPTY);
-        }
+        
+        CentralizedClass result = null;
+		try {
+			result = sLS(tasks, vehicles, terminateCondition);
+		} catch (Exception e) {
+			System.exit(-1);
+		}
         
         long time_end = System.currentTimeMillis();
         long duration = time_end - time_start;
         System.out.println("The plan was generated in "+duration+" milliseconds.");
+        
+        List<Plan> plans = result.computePlan(vehicles);
+		for(Plan p : plans){
+			System.out.println(p);
+		}
         
         return plans;
     }
@@ -107,6 +116,7 @@ public class CentralizedTemplate implements CentralizedBehavior {
 		 * For each task we try to put it in each vehicle until one is enough big to carry it.
 		 * If no vehicle is enough big to carry task t we throw exception
 		 */
+		/**
 		for(Task t : tasks){
 			boolean taskPut = false;
 			int index = -1;
@@ -118,7 +128,121 @@ public class CentralizedTemplate implements CentralizedBehavior {
 				}
 				taskPut = result.putTask(t, vehicles.get(index));				
 			}
+		}*/
+		for(Task t : tasks){
+			boolean taskPut = false;
+			int index = (int)Math.floor(Math.random()*(vehicles.size()));
+			while(!taskPut){		
+				taskPut = result.putTask(t, vehicles.get(index));	
+				if(!taskPut)
+					index =(int)Math.floor(Math.random()*(vehicles.size()));
+			}
 		}
 		return result;
+	}
+	
+	public CentralizedClass localChoice(CentralizedClass aOld, List<CentralizedClass> n){
+		CentralizedClass abest = null;
+		int minCost = Integer.MAX_VALUE;
+		for(CentralizedClass cc : n){
+			int actualCost = cc.computeCost();
+			/**
+			for(Plan p : cc.computePlan(agent.vehicles())){
+				System.out.println(p);
+			}
+			System.out.println(actualCost);*/
+			if(minCost > actualCost){
+				minCost = actualCost;
+				abest = cc;
+			}
+		}
+						
+		if(Math.random() > pValue){
+			return aOld;
+		}
+		else{
+			return abest;
+		}
+	}
+	
+	//If it wasn't possible to assign the task to vehicle v2 we return null, to be treated in chooseNeighbours;
+	public CentralizedClass changingVehicle(CentralizedClass a, Vehicle v1, Vehicle v2){
+		CentralizedClass newA = a.clone();
+		TaskClass tc = newA.removeFirst(v1);
+		if(!newA.addFirst(tc, v2)){
+			return null;
+		}
+		
+		return newA;
+	}
+	
+	//If it wasn't possible to swap tasks we return null, to be treated in chooseNeighbours;
+	public CentralizedClass changingTaskOrder(CentralizedClass a, Vehicle v, int indexOld, int indexNew){
+		CentralizedClass newA = a.clone();
+		if(!newA.swapTask(v, indexOld, indexNew)){
+			return null;
+		}
+		return newA;
+	}
+	
+	public List<CentralizedClass> ChooseNeighbours(CentralizedClass a, List<Vehicle> vehicles){
+		List<CentralizedClass> n = new ArrayList<CentralizedClass>();
+		boolean bool = true;
+		Vehicle vi = null;
+		int rand =  (int)Math.floor(Math.random()*(vehicles.size()));
+
+		while(bool){
+			vi = vehicles.get(rand);
+			if(a.getNbTask(vi) > 0){
+				bool = false;
+			}
+			else{
+				rand = ++rand % vehicles.size();
+			}
+		}
+
+		/**
+		for(Plan p : a.computePlan(vehicles)){
+			System.out.println(p);
+		}*/
+		for(Vehicle v : vehicles){
+			if(!v.equals(vi)){
+				CentralizedClass newA = changingVehicle(a,vi,v);
+				if(newA != null){
+					n.add(newA);
+				}
+			}
+		}
+		int length = a.getNbTask(vi);
+		if(length >=4){
+			for(int tIdx1 = 0; tIdx1 < length-1; tIdx1++){
+				for(int tIdx2=tIdx1+1; tIdx2 < length; tIdx2++){
+					CentralizedClass newA = changingTaskOrder(a,vi,tIdx1,tIdx2);
+					if(newA != null){
+						n.add(newA);
+					}
+				}
+			}
+		}
+		return n;
+	}
+	
+	public CentralizedClass sLS(TaskSet tasks, List<Vehicle> vehicles, int tCondition) throws Exception{
+		CentralizedClass a = createInitialSolution(tasks, vehicles);
+		int iteration =0;
+		while(iteration < tCondition){
+			iteration++;
+			CentralizedClass aOld = a;
+			List<CentralizedClass> n = ChooseNeighbours(aOld, vehicles);
+			//Infinite loop inside chooseNeighbours
+			
+			a = localChoice(aOld, n);
+			/**
+			for(Plan p : a.computePlan(vehicles)){
+				System.out.println(p);
+			}*/
+		}
+		
+		return a;
 	}
 }

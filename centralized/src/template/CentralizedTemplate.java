@@ -78,9 +78,6 @@ public class CentralizedTemplate implements CentralizedBehavior {
         System.out.println("The plan was generated in "+duration+" milliseconds.");
         
         List<Plan> plans = result.computePlan(vehicles);
-		for(Plan p : plans){
-			System.out.println(p);
-		}
         
         return plans;
     }
@@ -156,25 +153,11 @@ public class CentralizedTemplate implements CentralizedBehavior {
 				abest = cc;
 			}
 		}
-		int cost = 0;
-		for(Plan p : aOld.computePlan(agent.vehicles())){
-			cost+= p.totalDistance();
-		}
-		System.out.println("cost with a old "+cost);
-		cost = 0;
-		for(Plan p : abest.computePlan(agent.vehicles())){
-			cost+= p.totalDistance();
-		}
-		System.out.println("cost with a best "+cost);
-		
-		
-		
+						
 		if(Math.random() > pValue){
-			System.out.println("AOLD");
 			return aOld;
 		}
 		else{
-			System.out.println("ANEW");
 			return abest;
 		}
 	}

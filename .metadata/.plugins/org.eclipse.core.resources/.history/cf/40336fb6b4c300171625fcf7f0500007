@@ -19,7 +19,7 @@
 		-->
 		<probability distribution="uniform" min="0.0" max="1.0" />
 		<reward distribution="constant" policy="short-distances" min="100" max="99999" />
-		<weight distribution="constant" value="15" />
+		<weight distribution="constant" value="3" />
 
 	</tasks>
 	
@@ -32,7 +32,7 @@
 				<set color="#0000ff" />
 				<set home="Genève" />
 				<set speed="90" />
-				<set capacity="12" />
+				<set capacity="30" />
 				<set cost-per-km="5" />
 			</vehicle>
 			
@@ -59,7 +59,7 @@
 				<set color="#ffff00" />
 				<set home="St-Gallen" />
 				<set speed="90" />
-				<set capacity="10" />
+				<set capacity="30" />
 				<set cost-per-km="5" />
 			</vehicle>			
 		</company>
