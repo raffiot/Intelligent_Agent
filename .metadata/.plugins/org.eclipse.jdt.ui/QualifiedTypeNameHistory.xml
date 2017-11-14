@@ -6,4 +6,7 @@
 <fullyQualifiedTypeName name="template.CentralizedClass"/>
 <fullyQualifiedTypeName name="logist.plan.Plan"/>
 <fullyQualifiedTypeName name="java.lang.System"/>
+<fullyQualifiedTypeName name="java.util.List"/>
+<fullyQualifiedTypeName name="java.util.HashMap"/>
+<fullyQualifiedTypeName name="java.lang.Long"/>
 </qualifiedTypeNameHistroy>
