@@ -47,9 +47,8 @@ public class CentralizedTemplate implements CentralizedBehavior {
 					value += distribution.probability(c1, c2);
 				}
 			}
-			System.out.println(value);
 		}
-    	
+    	System.out.println(value);
     	System.out.println(topology.cities().size());
     	
     	pValue = 0.5;

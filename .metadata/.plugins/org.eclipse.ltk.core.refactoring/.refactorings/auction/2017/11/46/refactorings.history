@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename local variable &apos;distanceToPickup&apos; in &apos;template.AuctionTemplate.auctionResult(...)&apos; to &apos;distanceToPickup&apos;&#x0D;&#x0A;- Original project: &apos;auction&apos;&#x0D;&#x0A;- Original element: &apos;template.AuctionTemplate.auctionResult(Task, int, Long[]).ditanceToPickup&apos;&#x0D;&#x0A;- Renamed element: &apos;distanceToPickup&apos;&#x0D;&#x0A;- Update references to refactored element" description="Rename local variable &apos;distanceToPickup&apos;" id="org.eclipse.jdt.ui.rename.local.variable" input="/src&lt;template{AuctionTemplate.java[AuctionTemplate~auctionResult~QTask;~I~\[QLong;@ditanceToPickup!2586!2651!2607!2621!QHashMap\&lt;QCity;QDouble;&gt;;!0!false" name="distanceToPickup" references="true" stamp="1510841994375" version="1.0"/>
+</session>

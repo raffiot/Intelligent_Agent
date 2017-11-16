@@ -96,29 +96,21 @@ public class AuctionTemplate implements AuctionBehavior {
 				distanceToPickup.put(c, (c.distanceTo(previous.pickupCity)+previous.pickupCity.distanceTo(previous.deliveryCity))*meanCostPerKm);
 			}
 			for(int i = 0; i<bids.length; i++){
-				if(i != agent.id()){
-					Long bid = bids[i];
-					double minDiff = Double.MAX_VALUE;
-					City minCity = null;
-					for(City c : topology.cities()){
-						if(minDiff > Math.abs(bid -distanceToPickup.get(c))){
-							minDiff = Math.abs(bid -distanceToPickup.get(c));
-							minCity = c;
-						}
+				Long bid = bids[i];
+				double minDiff = Double.MAX_VALUE;
+				City minCity = null;
+				for(City c : topology.cities()){
+					if(minDiff > Math.abs(bid -distanceToPickup.get(c))){
+						minDiff = Math.abs(bid -distanceToPickup.get(c));
+						minCity = c;
 					}
-					//We create the fictive Vehicle of the opponent 
-					VehicleImpl vi = new VehicleImpl(0, "opponent", (int)meanCapacity, (int)meanCostPerKm, minCity, 0L, Color.black);
-					Vehicle v = vi.getInfo();
-					ArrayList<Vehicle> ve = new ArrayList<Vehicle>();
-					ve.add(v);
-					CentralizedClass cc = new CentralizedClass(ve);
-					Opponent op = new Opponent(new ArrayList<Task>(),cc);
-					opponents.put(i, op);
 				}
+				VehicleImpl v = new VehicleImpl(0, "opponent", meanCapacity, meanCostPerKm, minCity, 0, Color.black);
+				CentralizedClass cc = new
+				opponents.put(i, )
 			}
 			firstIteration = false; 	
 		}
-		//TODO remove task from everyone except the winner
 		
 	}
 	
@@ -134,16 +126,7 @@ public class AuctionTemplate implements AuctionBehavior {
 			resultBid = getFactorBid(task,v);
 
 			if(!firstIteration){
-				//TODO
 				//Si no es la primera iteration compute others bid and change resultbib
-				//Only compute the top 3
-				/**
-				 * for(opponents op)
-				 * op.cc.add(task).computeCost --> add to list of bid
-				 * 
-				 * modifyOUrBid(ourbid, list of opponent bid
-				 * 
-				 */
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

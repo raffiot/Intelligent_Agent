@@ -1,7 +1,6 @@
 package template;
 
 //the list of imports
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,7 +10,6 @@ import logist.Measures;
 import logist.behavior.AuctionBehavior;
 import logist.agent.Agent;
 import logist.simulation.Vehicle;
-import logist.simulation.VehicleImpl;
 import logist.plan.Plan;
 import logist.task.Task;
 import logist.task.TaskDistribution;
@@ -91,34 +89,17 @@ public class AuctionTemplate implements AuctionBehavior {
 			toDiscover.remove(previous.pickupCity);
 		}
 		if(firstIteration){
-			HashMap<City,Double> distanceToPickup = new HashMap<City,Double>();
+			HashMap<City,Double> ditanceToPickup = new HashMap<City,Double>();
 			for(City c : topology.cities()){
-				distanceToPickup.put(c, (c.distanceTo(previous.pickupCity)+previous.pickupCity.distanceTo(previous.deliveryCity))*meanCostPerKm);
+				ditanceToPickup.put(c, (c.distanceTo(previous.pickupCity)+previous.pickupCity.distanceTo(previous.deliveryCity))*meanCostPerKm);
 			}
-			for(int i = 0; i<bids.length; i++){
-				if(i != agent.id()){
-					Long bid = bids[i];
-					double minDiff = Double.MAX_VALUE;
-					City minCity = null;
-					for(City c : topology.cities()){
-						if(minDiff > Math.abs(bid -distanceToPickup.get(c))){
-							minDiff = Math.abs(bid -distanceToPickup.get(c));
-							minCity = c;
-						}
-					}
-					//We create the fictive Vehicle of the opponent 
-					VehicleImpl vi = new VehicleImpl(0, "opponent", (int)meanCapacity, (int)meanCostPerKm, minCity, 0L, Color.black);
-					Vehicle v = vi.getInfo();
-					ArrayList<Vehicle> ve = new ArrayList<Vehicle>();
-					ve.add(v);
-					CentralizedClass cc = new CentralizedClass(ve);
-					Opponent op = new Opponent(new ArrayList<Task>(),cc);
-					opponents.put(i, op);
-				}
+			for(Long bid : bids){
+				double minDiff = Double.MAX_VALUE;
+				City minCity = null;
+				
 			}
 			firstIteration = false; 	
 		}
-		//TODO remove task from everyone except the winner
 		
 	}
 	
@@ -134,16 +115,7 @@ public class AuctionTemplate implements AuctionBehavior {
 			resultBid = getFactorBid(task,v);
 
 			if(!firstIteration){
-				//TODO
 				//Si no es la primera iteration compute others bid and change resultbib
-				//Only compute the top 3
-				/**
-				 * for(opponents op)
-				 * op.cc.add(task).computeCost --> add to list of bid
-				 * 
-				 * modifyOUrBid(ourbid, list of opponent bid
-				 * 
-				 */
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

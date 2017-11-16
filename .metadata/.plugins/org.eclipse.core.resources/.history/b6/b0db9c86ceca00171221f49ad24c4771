@@ -47,10 +47,8 @@ public class CentralizedTemplate implements CentralizedBehavior {
 					value += distribution.probability(c1, c2);
 				}
 			}
-			System.out.println(value);
 		}
-    	
-    	System.out.println(topology.cities().size());
+    	System.out.println(value);
     	
     	pValue = 0.5;
         // this code is used to get the timeouts

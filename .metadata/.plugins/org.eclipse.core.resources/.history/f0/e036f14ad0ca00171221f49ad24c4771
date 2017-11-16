@@ -1,7 +1,6 @@
 package template;
 
 //the list of imports
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,7 +10,6 @@ import logist.Measures;
 import logist.behavior.AuctionBehavior;
 import logist.agent.Agent;
 import logist.simulation.Vehicle;
-import logist.simulation.VehicleImpl;
 import logist.plan.Plan;
 import logist.task.Task;
 import logist.task.TaskDistribution;
@@ -41,10 +39,8 @@ public class AuctionTemplate implements AuctionBehavior {
 	private CentralizedClass ourFutureSolution;
 	private boolean firstIteration;
 	private HashMap<Integer, Opponent> opponents;
+	private HashMap<City,Double> probabilityTask;
 	private double meanCapacity;
-	private double meanCostPerKm;
-	private List<City> toDiscover;
-	
 	
 	@Override
 	public void setup(Topology topology, TaskDistribution distribution,
@@ -55,7 +51,7 @@ public class AuctionTemplate implements AuctionBehavior {
 		firstIteration = true;
 		pValue = 0.5;
 		
-		opponents = new HashMap<Integer, Opponent>(); //Integer determinate it's position in Long[] bid table
+		opponents = new HashMap<Integer, Opponent>();
 		ourSolution = new CentralizedClass(agent.vehicles());
 		
 		this.topology = topology;
@@ -66,17 +62,23 @@ public class AuctionTemplate implements AuctionBehavior {
 		
 		long seed = -9019554669489983951L * currentCity.hashCode() * agent.id();
 		this.random = new Random(seed);
+		probabilityTask = new HashMap<City,Double>();
+		
+		for(City c1 : topology.cities()){
+			double value = 0;
+			for(City c2: topology.cities()){
+				if(!c1.equals(c2)){
+					value += distribution.probability(c1, c2);
+				}
+			}
+			probabilityTask.put(c1, value);
+		}
 		
 		meanCapacity = 0;
-		meanCostPerKm = 0;
 		for(Vehicle v : agent.vehicles()){
 			meanCapacity += v.capacity();
-			meanCostPerKm += v.costPerKm();
 		}
 		meanCapacity /= agent.vehicles().size();
-		meanCostPerKm /= agent.vehicles().size();
-		
-		toDiscover = new ArrayList<City>(topology.cities());
 		
 		
 	}
@@ -87,39 +89,8 @@ public class AuctionTemplate implements AuctionBehavior {
 			currentCity = previous.deliveryCity;
 			ourSolution = ourFutureSolution;
 			marginalCost = futureMaginalCost;
-			toDiscover.removeAll(previous.pickupCity.pathTo(previous.deliveryCity));
-			toDiscover.remove(previous.pickupCity);
 		}
-		if(firstIteration){
-			HashMap<City,Double> distanceToPickup = new HashMap<City,Double>();
-			for(City c : topology.cities()){
-				distanceToPickup.put(c, (c.distanceTo(previous.pickupCity)+previous.pickupCity.distanceTo(previous.deliveryCity))*meanCostPerKm);
-			}
-			for(int i = 0; i<bids.length; i++){
-				if(i != agent.id()){
-					Long bid = bids[i];
-					double minDiff = Double.MAX_VALUE;
-					City minCity = null;
-					for(City c : topology.cities()){
-						if(minDiff > Math.abs(bid -distanceToPickup.get(c))){
-							minDiff = Math.abs(bid -distanceToPickup.get(c));
-							minCity = c;
-						}
-					}
-					//We create the fictive Vehicle of the opponent 
-					VehicleImpl vi = new VehicleImpl(0, "opponent", (int)meanCapacity, (int)meanCostPerKm, minCity, 0L, Color.black);
-					Vehicle v = vi.getInfo();
-					ArrayList<Vehicle> ve = new ArrayList<Vehicle>();
-					ve.add(v);
-					CentralizedClass cc = new CentralizedClass(ve);
-					Opponent op = new Opponent(new ArrayList<Task>(),cc);
-					opponents.put(i, op);
-				}
-			}
-			firstIteration = false; 	
-		}
-		//TODO remove task from everyone except the winner
-		
+		firstIteration = false; 
 	}
 	
 	@Override
@@ -133,17 +104,10 @@ public class AuctionTemplate implements AuctionBehavior {
 		try {
 			resultBid = getFactorBid(task,v);
 
-			if(!firstIteration){
-				//TODO
-				//Si no es la primera iteration compute others bid and change resultbib
-				//Only compute the top 3
-				/**
-				 * for(opponents op)
-				 * op.cc.add(task).computeCost --> add to list of bid
-				 * 
-				 * modifyOUrBid(ourbid, list of opponent bid
-				 * 
-				 */
+			if(firstIteration){
+			}
+			else{
+				//Compute others bids
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -171,30 +135,24 @@ public class AuctionTemplate implements AuctionBehavior {
 		double factor = 1.;
 		factor += getFactorProbability(task);
 		factor += getFactorCapacity(task);
-		return bid*(long)factor;
+		return bid;
 	}
 
 	private double getFactorCapacity(Task task) {
-		double factor = Math.exp(task.weight/meanCapacity);
-		return AuctionTemplate.map(factor, 1, Math.exp(1), -0.05, 0.3);
+		
+		return 0;
 	}
 
 	//This Method compute the factor with which we multiply the bid.
-	//The factor is in function of the cities where we never been.
+	//If low prob factor close to 0 if high prob factor
+	//Between -0.15 and +0.15
 	private double getFactorProbability(Task task) {
-		double probability = 0;
-		City pickup = task.pickupCity;
-		for(City c : toDiscover){
-			probability += distribution.probability(pickup, c);
-		}
+		double probability = probabilityTask.get(task.pickupCity);
 		
 		for(City onPath: task.pickupCity.pathTo(task.deliveryCity)){
-			for(City c : toDiscover){
-				probability += distribution.probability(onPath, c);
-			}	
+			probability += probabilityTask.get(onPath);		
 		}
 		probability/=topology.cities().size();
-		
 		return -0.15*(2*probability-1);
 	}
 
@@ -332,8 +290,4 @@ public class AuctionTemplate implements AuctionBehavior {
 		
 		return a;
 	}
-	
-	static double map(double x, double a, double b, double c, double d) {
-        return (x - a) * (d - c) / (b - a) + c;
-    }
 }
