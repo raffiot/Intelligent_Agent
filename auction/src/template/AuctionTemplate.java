@@ -3,6 +3,9 @@ package template;
 //the list of imports
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
@@ -40,6 +43,7 @@ public class AuctionTemplate implements AuctionBehavior {
 	private CentralizedClass ourSolution;
 	private CentralizedClass ourFutureSolution;
 	private boolean firstIteration;
+	private int iterations;
 	private HashMap<Integer, Opponent> opponents;
 	private double meanCapacity;
 	private double meanCostPerKm;
@@ -50,6 +54,7 @@ public class AuctionTemplate implements AuctionBehavior {
 	public void setup(Topology topology, TaskDistribution distribution,
 			Agent agent) {
 
+		iterations = 0;
 		marginalCost = 0;
 		futureMaginalCost =0;
 		firstIteration = true;
@@ -83,6 +88,11 @@ public class AuctionTemplate implements AuctionBehavior {
 
 	@Override
 	public void auctionResult(Task previous, int winner, Long[] bids) {
+		iterations++;
+		System.out.println("auction result, winner =" +winner);
+		for(int i = 0; i < bids.length; i++){
+			System.out.println(" bids = "+bids[i]);
+		}
 		if (winner == agent.id()) {
 			currentCity = previous.deliveryCity;
 			ourSolution = ourFutureSolution;
@@ -112,18 +122,27 @@ public class AuctionTemplate implements AuctionBehavior {
 					ArrayList<Vehicle> ve = new ArrayList<Vehicle>();
 					ve.add(v);
 					CentralizedClass cc = new CentralizedClass(ve);
-					Opponent op = new Opponent(new ArrayList<Task>(),cc);
+					Opponent op = new Opponent(new ArrayList<Task>(),cc,ve);
 					opponents.put(i, op);
 				}
 			}
 			firstIteration = false; 	
 		}
 		//TODO remove task from everyone except the winner
+		for(Integer oppId : opponents.keySet()){
+			if(oppId != winner){
+				Opponent op = opponents.get(oppId);
+				op.getSolution().removeTask(previous);
+				op.addTask(previous);
+				op.setCurCost(op.getSolution().computeCost());
+			}
+		}
 		
 	}
 	
 	@Override
 	public Long askPrice(Task task) {
+		System.out.println("askprice "+task+" it "+iterations);
 		Long resultBid = Long.MAX_VALUE;
 		Vehicle v = cantCarry(task);
 		if(v == null){
@@ -132,38 +151,61 @@ public class AuctionTemplate implements AuctionBehavior {
 		}
 		try {
 			resultBid = getFactorBid(task,v);
-
+			double minOpponentCost = Double.MAX_VALUE;
 			if(!firstIteration){
 				//TODO
 				//Si no es la primera iteration compute others bid and change resultbib
 				//Only compute the top 3
-				/**
-				 * for(opponents op)
-				 * op.cc.add(task).computeCost --> add to list of bid
-				 * 
-				 * modifyOUrBid(ourbid, list of opponent bid
-				 * 
-				 */
+				if(iterations < 10){
+					for(Integer i : opponents.keySet()){
+						Opponent op = opponents.get(i);
+						op.getSolution().putTask(task,op.getVehicle().get(0));
+						
+						CentralizedClass cc = sLS(op.getSolution(), op.getVehicle() , 10000L);//TODO: tcondition in fuction of time!!!
+						double cost = cc.computeCost() - op.getCurCost();
+						if(cost < minOpponentCost){
+							minOpponentCost = cost;
+						}
+					}
+				}
+				else{
+					Collection c = opponents.values();
+					List<Opponent> l = new ArrayList<Opponent>(c);
+					Collections.sort(l, new Comparator<Opponent>(){
+
+						@Override
+						public int compare(Opponent arg0, Opponent arg1) {
+							
+							return arg0.getTasks().size()<arg1.getTasks().size() ? -1 : 1 ;
+						}
+						
+					});
+					int si = Math.min(3,l.size());
+					for(int i = 0; i< si; i++){
+						Opponent op = l.get(i);
+						op.getSolution().putTask(task,op.getVehicle().get(0));
+						
+						CentralizedClass cc = sLS(op.getSolution(), op.getVehicle() , 10000L);//TODO: tcondition in fuction of time!!!
+						double cost = cc.computeCost() - op.getCurCost();
+						op.setSolution(cc);
+						if(cost < minOpponentCost){
+							minOpponentCost = cost;
+						}
+					}
+				}
+				long diffAbs = Math.abs((long)minOpponentCost - resultBid);
+				if(diffAbs < resultBid*0.05){
+					resultBid = (long) (resultBid*0.95);
+				}
+				else{
+					resultBid = (long) (resultBid*1.05);
+				}
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		System.out.println("our bid"+resultBid);
 		return resultBid;
-		/**
-		if (vehicle.capacity() < task.weight)
-			return null;
-
-		long distanceTask = task.pickupCity.distanceUnitsTo(task.deliveryCity);
-		long distanceSum = distanceTask
-				+ currentCity.distanceUnitsTo(task.pickupCity);
-		double marginalCost = Measures.unitsToKM(distanceSum
-				* vehicle.costPerKm());
-
-		double ratio = 1.0 + (random.nextDouble() * 0.05 * task.id);
-		double bid = ratio * marginalCost;
-
-		return (long) Math.round(bid);*/
 	}
 
 	private Long getFactorBid(Task task, Vehicle v) throws Exception {
@@ -216,17 +258,39 @@ public class AuctionTemplate implements AuctionBehavior {
 
 	@Override
 	public List<Plan> plan(List<Vehicle> vehicles, TaskSet tasks) {
-		
+		long time_start = System.currentTimeMillis();
+        
 //		System.out.println("Agent " + agent.id() + " has tasks " + tasks);
-		Plan planVehicle1 = null;
-		//Plan planVehicle1 = naivePlan(vehicle, tasks);
-
-		List<Plan> plans = new ArrayList<Plan>();
-		plans.add(planVehicle1);
-		while (plans.size() < vehicles.size())
-			plans.add(Plan.EMPTY);
-
-		return plans;
+        
+        CentralizedClass result = null;
+		try {
+			result = createInitialSolution(tasks,vehicles);
+			result = sLS(result, vehicles, 10000L);
+		} catch (Exception e) {
+			System.exit(-1);
+		}
+        
+        long time_end = System.currentTimeMillis();
+        long duration = time_end - time_start;
+        System.out.println("The plan was generated in "+duration+" milliseconds.");
+        
+        List<Plan> plans = result.computePlan(vehicles);
+        
+        return plans;
+	}
+	
+	public CentralizedClass createInitialSolution(TaskSet tasks, List<Vehicle> vehicles) throws Exception{
+		CentralizedClass result = new CentralizedClass(vehicles);
+		for(Task t : tasks){
+			boolean taskPut = false;
+			int index = (int)Math.floor(Math.random()*(vehicles.size()));
+			while(!taskPut){		
+				taskPut = result.putTask(t, vehicles.get(index));	
+				if(!taskPut)
+					index =(int)Math.floor(Math.random()*(vehicles.size()));
+			}
+		}
+		return result;
 	}
 	
 	public CentralizedClass localChoice(CentralizedClass aOld, List<CentralizedClass> n){

@@ -47,6 +47,10 @@ public class TaskClass {
 		return tc.getTask() == this.task;
 	}
 	
+	public boolean sameTask(Task tc){
+		return tc == this.task;
+	}
+	
 	@Override
 	public String toString(){
 		return "Task :"+this.getTask()+" type :"+this.getType();

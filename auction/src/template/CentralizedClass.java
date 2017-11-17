@@ -192,4 +192,15 @@ public class CentralizedClass {
 		}
 		return plans;
 	}
+
+	public void removeTask(Task previous) {
+		for(Vehicle v : nextTask.keySet()){
+			LinkedList<TaskClass> ll = nextTask.get(v);
+			for(int i = 0; i< ll.size(); i++){
+				if(ll.get(i).sameTask(previous))
+					ll.remove(i);
+			}
+		}
+		
+	}
 }

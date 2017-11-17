@@ -1,16 +1,22 @@
 package template;
 
 import java.util.List;
+
+import logist.simulation.Vehicle;
 import logist.task.Task;
 
 public class Opponent {
 	private List<Task> tasks;
 	private CentralizedClass solution;
+	private List<Vehicle> vehicle;
+	private double curCost;
 	
 	
-	public Opponent(List<Task> tasks, CentralizedClass solution) {
+	public Opponent(List<Task> tasks, CentralizedClass solution,List<Vehicle> vehicle) {
 		this.tasks = tasks;
 		this.solution = solution;
+		this.vehicle = vehicle;
+		curCost = 0.;
 	}
 	
 	public List<Task> getTasks() {
@@ -24,6 +30,26 @@ public class Opponent {
 	}
 	public void setSolution(CentralizedClass solution) {
 		this.solution = solution;
+	}
+
+	public List<Vehicle> getVehicle() {
+		return vehicle;
+	}
+
+	public void setVehicle(List<Vehicle> vehicle) {
+		this.vehicle = vehicle;
+	}
+
+	public double getCurCost() {
+		return curCost;
+	}
+
+	public void setCurCost(double curCost) {
+		this.curCost = curCost;
+	}
+	
+	public void addTask(Task t){
+		tasks.add(t);
 	}
 	
 	
