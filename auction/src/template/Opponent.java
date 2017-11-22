@@ -51,6 +51,11 @@ public class Opponent {
 	public void addTask(Task t){
 		tasks.add(t);
 	}
+
+	@Override
+	public String toString() {
+		return "Opponent [tasks=" + tasks + ", vehicle=" + vehicle + ", curCost=" + curCost + "]";
+	}
 	
 	
 }

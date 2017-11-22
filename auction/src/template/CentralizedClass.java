@@ -1,5 +1,6 @@
 package template;
 
+import logist.Measures;
 import logist.plan.Plan;
 import logist.simulation.Vehicle;
 import logist.task.Task;
@@ -63,18 +64,19 @@ public class CentralizedClass {
 		 * For each vehicle which have task assigned we compute a cost as
 		 * sum of all distances * costPerKm of the vehicle
 		 */
-		
+		//22-11-2017 Changed with distanceUnitsTo and unitsToKM as in spec.
 		for(Vehicle v: nextTask.keySet()){
 			int cost = 0;
 			if(!nextTask.get(v).isEmpty()){
-				City oldCity = v.getCurrentCity();
+				//City oldCity = v.getCurrentCity();
+				City oldCity = v.homeCity();
 				for(TaskClass tc: nextTask.get(v)){
 					City newCity = tc.getCity();
-					cost += oldCity.distanceTo(newCity);
+					cost += oldCity.distanceUnitsTo(newCity);
 					oldCity = newCity;
 				}
 			}
-			totalCost += cost*v.costPerKm();
+			totalCost += Measures.unitsToKM(cost*v.costPerKm());
 		}
 		return totalCost;
 	}
@@ -172,7 +174,8 @@ public class CentralizedClass {
 	public List<Plan> computePlan(List<Vehicle> vehicles){
 		List<Plan> plans = new ArrayList<Plan>();
 		for(Vehicle v : vehicles){
-			City currentCity = v.getCurrentCity();
+			//City currentCity = v.getCurrentCity();
+			City currentCity = v.homeCity();
 			Plan p = new Plan(currentCity);
 			LinkedList<TaskClass> ll = nextTask.get(v);
 			for(TaskClass tc : ll){
