@@ -4,6 +4,7 @@ import logist.Measures;
 import logist.plan.Plan;
 import logist.simulation.Vehicle;
 import logist.task.Task;
+import logist.task.TaskSet;
 import logist.topology.Topology.City;
 
 import java.util.*;
@@ -205,5 +206,26 @@ public class CentralizedClass {
 			}
 		}
 		
+	}
+
+	public CentralizedClass clone(TaskSet tasks) {
+		HashMap<Vehicle,LinkedList<TaskClass>> newNextTask = new HashMap<Vehicle,LinkedList<TaskClass>>();
+		for(Vehicle v : nextTask.keySet()){
+			LinkedList<TaskClass> ll = new LinkedList<TaskClass>();
+			for(TaskClass tc : nextTask.get(v)){
+				TaskClass t = getTaskFromTaskSet(tc,tasks);
+				ll.add(t);
+			}
+			newNextTask.put(v, ll);
+		}
+		return new CentralizedClass(newNextTask);
+	}
+
+	private TaskClass getTaskFromTaskSet(TaskClass tc, TaskSet tasks) {
+		for(Task t: tasks){
+			if(t.id == tc.getTask().id)
+				return new TaskClass(t,tc.getType());
+		}
+		return null;
 	}
 }

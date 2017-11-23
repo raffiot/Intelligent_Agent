@@ -10,8 +10,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
+import logist.LogistSettings;
 import logist.Measures;
 import logist.behavior.AuctionBehavior;
+import logist.config.Parsers;
 import logist.agent.Agent;
 import logist.simulation.Vehicle;
 import logist.simulation.VehicleImpl;
@@ -48,6 +50,12 @@ public class AuctionTemplate implements AuctionBehavior {
 	private double meanCapacity;
 	private double meanCostPerKm;
 	private List<City> toDiscover;
+	private CentralizedClass bestASLS;
+	private int bestCostSLS;
+	private int benefit;
+	
+    private long timeout_plan;
+    private long timeout_bid;
 	
 	
 	@Override
@@ -80,10 +88,20 @@ public class AuctionTemplate implements AuctionBehavior {
 		}
 		meanCapacity /= agent.vehicles().size();
 		meanCostPerKm /= agent.vehicles().size();
+		benefit = 0;
 		
 		toDiscover = new ArrayList<City>(topology.cities());
 		
+		LogistSettings ls = null;
+        try {
+            ls = Parsers.parseSettings("config\\settings_auction.xml");
+        }
+        catch (Exception exc) {
+            System.out.println("There was a problem loading the configuration file.");
+        }
 		
+        timeout_plan = ls.get(LogistSettings.TimeoutKey.PLAN);
+        timeout_bid = ls.get(LogistSettings.TimeoutKey.BID);
 	}
 
 	@Override
@@ -99,6 +117,7 @@ public class AuctionTemplate implements AuctionBehavior {
 			marginalCost = futureMaginalCost;
 			toDiscover.removeAll(previous.pickupCity.pathTo(previous.deliveryCity));
 			toDiscover.remove(previous.pickupCity);
+			benefit += bids[winner];
 		}
 		if(firstIteration){
 			HashMap<City,Double> distanceToPickup = new HashMap<City,Double>();
@@ -116,7 +135,7 @@ public class AuctionTemplate implements AuctionBehavior {
 							minCity = c;
 						}
 					}
-					//We create the fictive Vehicle of the opponent 
+					//We create the ficticious Vehicle of the opponent 
 					System.out.println("mincity :"+minCity.name);
 					VehicleImpl vi = new VehicleImpl(0, "opponent", (int)meanCapacity, (int)meanCostPerKm, minCity, 0L, Color.black);
 					//CURRENTCITY ISN'T AVAILABLE USE HOMECITY INSTEAD
@@ -130,12 +149,10 @@ public class AuctionTemplate implements AuctionBehavior {
 			}
 			firstIteration = false; 	
 		}
-		//TODO remove task from everyone except the winner
 		for(Integer oppId : opponents.keySet()){
 			if(oppId != winner){
 				Opponent op = opponents.get(oppId);
 				op.getSolution().removeTask(previous);
-				//op.addTask(previous);
 				op.setCurCost(op.getSolution().computeCost());
 			}
 			else if(firstIteration && oppId == winner ){
@@ -153,6 +170,8 @@ public class AuctionTemplate implements AuctionBehavior {
 	
 	@Override
 	public Long askPrice(Task task) {
+		long time_start = System.currentTimeMillis();
+		
 		System.out.println("askprice "+task+" it "+iterations);
 		Long resultBid = Long.MAX_VALUE;
 		Vehicle v = cantCarry(task);
@@ -169,10 +188,11 @@ public class AuctionTemplate implements AuctionBehavior {
 				//Only compute the top 3
 				if(iterations < 10){
 					for(Integer i : opponents.keySet()){
+						time_start = System.currentTimeMillis();
 						Opponent op = opponents.get(i);
 						op.getSolution().putTask(task,op.getVehicle().get(0));
 						System.out.println("compute opponent");
-						CentralizedClass cc = sLS(op.getSolution(), op.getVehicle() , 5L);//TODO: tcondition in fuction of time!!!
+						CentralizedClass cc = sLS(op.getSolution(), op.getVehicle() , (long)(1/(6.*opponents.size())*timeout_bid+time_start));//TODO: tcondition in fuction of time!!!
 						double cost = cc.computeCost() - op.getCurCost();
 						if(cost < minOpponentCost){
 							minOpponentCost = cost;
@@ -193,10 +213,11 @@ public class AuctionTemplate implements AuctionBehavior {
 					});
 					int si = Math.min(3,l.size());
 					for(int i = 0; i< si; i++){
+						time_start = System.currentTimeMillis();
 						Opponent op = l.get(i);
 						op.getSolution().putTask(task,op.getVehicle().get(0));
 						
-						CentralizedClass cc = sLS(op.getSolution(), op.getVehicle() , 5L);//TODO: tcondition in fuction of time!!!
+						CentralizedClass cc = sLS(op.getSolution(), op.getVehicle() , (long)(1/(18.)*timeout_bid+time_start));//TODO: tcondition in fuction of time!!!
 						double cost = cc.computeCost() - op.getCurCost();
 						op.setSolution(cc);
 						if(cost < minOpponentCost){
@@ -255,17 +276,20 @@ public class AuctionTemplate implements AuctionBehavior {
 	}
 
 	private Vehicle cantCarry(Task task) {
-		for(Vehicle v : agent.vehicles()){
-			if(v.capacity() >= task.weight) return v;
+		boolean taskPut = false;
+		int index = (int)(Math.random()*agent.vehicles().size());
+		while(true){		
+			if(agent.vehicles().get(index).capacity() >= task.weight)
+				return agent.vehicles().get(index);	
+			index = (index +1) % agent.vehicles().size();
 		}
-		return null;
 	}
 
 	private int getInitialBid(Task task, Vehicle v) throws Exception {
+		long time_start = System.currentTimeMillis();
 		ourFutureSolution = ourSolution.clone();
 		ourFutureSolution.addFirst(new TaskClass(task,TaskClass.pickup), v); //will always return true
-		Long tCondition = 5L; //Maybe 2/3 of time assigned
-		ourFutureSolution = sLS(ourFutureSolution, agent.vehicles(), tCondition);
+		ourFutureSolution = sLS(ourFutureSolution, agent.vehicles(), (long)((4/6.)*timeout_bid+time_start));
 		
 		for(Plan p : ourFutureSolution.computePlan(agent.vehicles())){
 			System.out.println(p);
@@ -280,15 +304,21 @@ public class AuctionTemplate implements AuctionBehavior {
 		long time_start = System.currentTimeMillis();
         
 //		System.out.println("Agent " + agent.id() + " has tasks " + tasks);
-        
+       
         CentralizedClass result = null;
 		try {
-			result = createInitialSolution(tasks,vehicles);
-			result = sLS(result, vehicles, 10000L);
+			result = ourSolution.clone(tasks);
+			result = sLS(result, vehicles, (long)((4/6.)*timeout_plan+time_start));
+			
 		} catch (Exception e) {
 			System.exit(-1);
 		}
-        
+		System.out.println("Benefit before minus plan us "+benefit);
+		for(Plan p : result.computePlan(agent.vehicles())){
+			System.out.println(p);
+			benefit -= Measures.unitsToKM(p.totalDistanceUnits()*5);
+		}
+		System.out.println("Final Benefit us "+benefit);
         long time_end = System.currentTimeMillis();
         long duration = time_end - time_start;
         System.out.println("The plan was generated in "+duration+" milliseconds.");
@@ -296,20 +326,6 @@ public class AuctionTemplate implements AuctionBehavior {
         List<Plan> plans = result.computePlan(vehicles);
         
         return plans;
-	}
-	
-	public CentralizedClass createInitialSolution(TaskSet tasks, List<Vehicle> vehicles) throws Exception{
-		CentralizedClass result = new CentralizedClass(vehicles);
-		for(Task t : tasks){
-			boolean taskPut = false;
-			int index = (int)Math.floor(Math.random()*(vehicles.size()));
-			while(!taskPut){		
-				taskPut = result.putTask(t, vehicles.get(index));	
-				if(!taskPut)
-					index =(int)Math.floor(Math.random()*(vehicles.size()));
-			}
-		}
-		return result;
 	}
 	
 	public CentralizedClass localChoice(CentralizedClass aOld, List<CentralizedClass> n){
@@ -327,7 +343,10 @@ public class AuctionTemplate implements AuctionBehavior {
 				abest = cc;
 			}
 		}
-						
+		if(minCost < bestCostSLS){
+			bestASLS = abest;
+			bestCostSLS = minCost;
+		}
 		if(Math.random() > pValue || abest == null){
 			return aOld;
 		}
@@ -401,16 +420,16 @@ public class AuctionTemplate implements AuctionBehavior {
 	
 	public CentralizedClass sLS(CentralizedClass solution,List<Vehicle> vehicles, long tCondition) throws Exception{
 		CentralizedClass a = solution;
-		long time = 0; //To be modified with something like current time.
-		while(time < tCondition){
-			time++;
+		bestASLS = a;
+		bestCostSLS = a.computeCost();
+		
+		while(System.currentTimeMillis() < tCondition){
 			CentralizedClass aOld = a;
 			List<CentralizedClass> n = ChooseNeighbours(aOld, vehicles);
 			a = localChoice(aOld, n);
-			
 		}
 		
-		return a;
+		return bestASLS;
 	}
 	
 	static double map(double x, double a, double b, double c, double d) {

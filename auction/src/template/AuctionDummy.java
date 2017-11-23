@@ -23,11 +23,13 @@ public class AuctionDummy implements AuctionBehavior {
 	private Random random;
 	private Vehicle vehicle;
 	private City currentCity;
+	private int benefit;
 
 	@Override
 	public void setup(Topology topology, TaskDistribution distribution,
 			Agent agent) {
 
+		benefit = 0;
 		this.topology = topology;
 		this.distribution = distribution;
 		this.agent = agent;
@@ -41,6 +43,7 @@ public class AuctionDummy implements AuctionBehavior {
 	@Override
 	public void auctionResult(Task previous, int winner, Long[] bids) {
 		if (winner == agent.id()) {
+			benefit +=bids[winner];
 			currentCity = previous.deliveryCity;
 		}
 	}
@@ -74,7 +77,11 @@ public class AuctionDummy implements AuctionBehavior {
 		plans.add(planVehicle1);
 		while (plans.size() < vehicles.size())
 			plans.add(Plan.EMPTY);
-
+		System.out.println("Benefit before minus plan other "+benefit);
+		for(Plan p : plans){
+			benefit -= Measures.unitsToKM(p.totalDistanceUnits()*5);
+		}
+		System.out.println("Final Benefit other "+benefit);
 		return plans;
 	}
 
