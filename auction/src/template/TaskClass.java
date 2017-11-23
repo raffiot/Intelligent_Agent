@@ -48,7 +48,7 @@ public class TaskClass {
 	}
 	
 	public boolean sameTask(Task tc){
-		return tc == this.task;
+		return tc.id == this.task.id;
 	}
 	
 	@Override
