@@ -7,13 +7,13 @@
 	<settings import="config/settings_auction.xml" />
 	
 	<!-- load the topology from an external file -->
-	<topology import="config/topology/switzerland.xml" />
+	<topology import="config/topology/suisse.xml" />
 	
 	<!-- load agents from an external file -->
 	<agents import="config/agents.xml" />
 	
 	<!-- define task distribution -->
-	<tasks number="6" rngSeed="123456">
+	<tasks number="4" rngSeed="123456">
 		<!--
 			the probabilities, rewards and weight of tasks
 		-->

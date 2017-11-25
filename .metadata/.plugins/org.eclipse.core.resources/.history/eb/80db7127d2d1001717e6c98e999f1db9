@@ -97,11 +97,6 @@ public class Opponent {
 		this.curCost = curCost;
 	}
 	
-	/**
-	 * Method to add a task to the task list of the opponent
-	 * @param t
-	 * 	the task to add
-	 */
 	public void addTask(Task t){
 		tasks.add(t);
 	}

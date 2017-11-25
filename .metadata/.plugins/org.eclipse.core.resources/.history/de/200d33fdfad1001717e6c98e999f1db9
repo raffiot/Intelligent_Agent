@@ -453,7 +453,7 @@ public class AuctionTemplate implements AuctionBehavior {
 	}
 	
 	/**
-	 * Method used inside SLS that return a solution (old one or a random one in new ones) in function of pValue
+	 * Method used inside SLS that return a solution (old one or best of the new ones) in function of pValue
 	 * In this method we use bestASLS to store the solution with minimum cost that will be return at the end of SLS computation.
 	 * 
 	 * @param aOld
@@ -465,17 +465,18 @@ public class AuctionTemplate implements AuctionBehavior {
 	 */
 	public CentralizedClass localChoice(CentralizedClass aOld, List<CentralizedClass> n){
 		CentralizedClass abest = null;
+		int minCost = Integer.MAX_VALUE;
 		for(CentralizedClass cc : n){
 			int actualCost = cc.computeCost();
-			if(bestCostSLS > actualCost){
-				bestCostSLS = actualCost;
-				bestASLS = cc;
+			if(minCost > actualCost){
+				minCost = actualCost;
+				abest = cc;
 			}
 		}
-		if(!n.isEmpty()){
-			abest = n.get((int)Math.random()*n.size());
+		if(minCost < bestCostSLS){
+			bestASLS = abest;
+			bestCostSLS = minCost;
 		}
-		
 		if(Math.random() > pValue || abest == null){
 			return aOld;
 		}
