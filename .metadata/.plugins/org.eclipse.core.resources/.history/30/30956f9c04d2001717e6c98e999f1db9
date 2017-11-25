@@ -120,6 +120,12 @@ public class AuctionTemplate implements AuctionBehavior {
 	public void auctionResult(Task previous, int winner, Long[] bids) {
 		iterations++;
 		
+		//Some prints to see winner and bids from everyone
+		System.out.println("auction result, winner =" +winner);
+		for(int i = 0; i < bids.length; i++){
+			System.out.println(" bids = "+bids[i]);
+		}
+		
 		/**
 		 * In case our company is winner we:
 		 * 	we update our current solution with the speculative one that included the task in auction
@@ -213,6 +219,7 @@ public class AuctionTemplate implements AuctionBehavior {
 	public Long askPrice(Task task) {
 		long time_start = System.currentTimeMillis();
 		
+		System.out.println("askprice "+task+" it "+iterations);
 		Long resultBid = Long.MAX_VALUE;
 		
 		/**
@@ -293,6 +300,7 @@ public class AuctionTemplate implements AuctionBehavior {
 			e.printStackTrace();
 		}
 		
+		System.out.println("our bid "+resultBid);
 		return resultBid;
 	}
 
@@ -312,9 +320,12 @@ public class AuctionTemplate implements AuctionBehavior {
 	 */
 	private Long getFactorBid(Task task, Vehicle v) throws Exception {
 		Long bid = new Long( getInitialBid(task,v));
+		System.out.println("first bid "+bid);
 		double factor = 1.;
 		factor += getFactorProbability(task);
+		System.out.println("second bid "+bid*factor);
 		factor += getFactorCapacity(task);
+		System.out.println("third bid "+bid*factor);
 		return (long)(bid*factor);
 	}
 
@@ -396,7 +407,11 @@ public class AuctionTemplate implements AuctionBehavior {
 		ourFutureSolution.addFirst(new TaskClass(task,TaskClass.pickup), v); //will always return true
 		ourFutureSolution = sLS(ourFutureSolution, agent.vehicles(), (long)((4/6.)*timeout_bid+time_start));
 		
+		for(Plan p : ourFutureSolution.computePlan(agent.vehicles())){
+			System.out.println(p);
+		}
 		futureMaginalCost = ourFutureSolution.computeCost();
+		System.out.println(futureMaginalCost);
 		return futureMaginalCost-marginalCost;
 	}
 
@@ -422,13 +437,12 @@ public class AuctionTemplate implements AuctionBehavior {
 		} catch (Exception e) {
 			System.exit(-1);
 		}
-		/**
 		System.out.println("Benefit before minus plan us "+benefit);
 		for(Plan p : result.computePlan(agent.vehicles())){
 			System.out.println(p);
 			benefit -= Measures.unitsToKM(p.totalDistanceUnits()*5);
 		}
-		System.out.println("Final Benefit us "+benefit);*/
+		System.out.println("Final Benefit us "+benefit);
         long time_end = System.currentTimeMillis();
         long duration = time_end - time_start;
         System.out.println("The plan was generated in "+duration+" milliseconds.");
