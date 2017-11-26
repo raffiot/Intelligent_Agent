@@ -119,7 +119,11 @@ public class AuctionTemplate implements AuctionBehavior {
 	@Override
 	public void auctionResult(Task previous, int winner, Long[] bids) {
 		iterations++;
-		System.out.println("winner "+winner+" of "+previous);
+		System.out.println();
+        System.out.println(winner + " won " + previous);
+        for (int i = 0; i < bids.length; ++i) {
+            System.out.println("  " + i + " bidded " + bids[i] + " CHF");
+        }
 		/**
 		 * In case our company is winner we:
 		 * 	we update our current solution with the speculative one that included the task in auction
@@ -165,7 +169,7 @@ public class AuctionTemplate implements AuctionBehavior {
 					/**
 					 * We create the ficticious Vehicle for the opponent 
 					 */
-					//System.out.println("mincity :"+minCity.name); Some debuggin print to see vehicle city
+					System.out.println("mincity :"+minCity.name); //Some debuggin print to see vehicle city
 					VehicleImpl vi = new VehicleImpl(0, "opponent", (int)meanCapacity, (int)meanCostPerKm, minCity, 0L, Color.black);
 					Vehicle v = vi.getInfo();
 					ArrayList<Vehicle> ve = new ArrayList<Vehicle>();
@@ -197,7 +201,17 @@ public class AuctionTemplate implements AuctionBehavior {
 			}
 			else{
 				op.addTask(previous);
+				op.setCurCost(op.getSolution().computeCost());
 			}
+			
+			//Method to print speculative opponent plan
+			System.out.println("----Opponent-----");
+			if(!op.getSolution().isEmpty()){
+				for(Plan p : op.getSolution().computePlan(op.getVehicle())){
+					System.out.println(p);
+				}
+			}
+			System.out.println("---------------");
 		}
 		firstIteration = false; 
 		
@@ -211,9 +225,9 @@ public class AuctionTemplate implements AuctionBehavior {
 	 */
 	@Override
 	public Long askPrice(Task task) {
-		System.out.println("task in auction: "+task);
+		//System.out.println("task in auction: "+task);
 		long time_start = System.currentTimeMillis();
-		
+		//System.out.println("task in auction "+task);
 		Long resultBid = Long.MAX_VALUE;
 		
 		/**
@@ -231,7 +245,7 @@ public class AuctionTemplate implements AuctionBehavior {
 			 * This line compute our first cost before opponents influence it
 			 */
 			resultBid = getFactorBid(task,v);
-			resultBid = Math.max(resultBid, -10);
+			resultBid = Math.max(resultBid, 30);
 			double minOpponentCost = Double.MAX_VALUE;
 			if(!firstIteration){
 				
@@ -246,6 +260,8 @@ public class AuctionTemplate implements AuctionBehavior {
 						op.getSolution().putTask(task,op.getVehicle().get(0));
 						CentralizedClass cc = sLS(op.getSolution(), op.getVehicle() , (long)(1/(6.*opponents.size())*timeout_bid+time_start));//TODO: tcondition in fuction of time!!!
 						double cost = cc.computeCost() - op.getCurCost();
+						System.out.println("cost = "+cost+" cc compute cost = "+cc.computeCost()+" getCurCost = "+op.getCurCost());
+						op.setSolution(cc);
 						if(cost < minOpponentCost){
 							minOpponentCost = cost;
 						}
@@ -282,6 +298,7 @@ public class AuctionTemplate implements AuctionBehavior {
 				 * With the minimum speculative cost of the opponents we change our result.
 				 * 
 				 */
+				
 				long diffAbs = Math.abs((long)minOpponentCost - resultBid);
 				if(diffAbs < resultBid*0.05){
 					resultBid = (long) (resultBid*0.95);
@@ -313,12 +330,9 @@ public class AuctionTemplate implements AuctionBehavior {
 	 */
 	private Long getFactorBid(Task task, Vehicle v) throws Exception {
 		Long bid = new Long( getInitialBid(task,v));
-		System.out.println("1.bid "+bid);
 		double factor = 1.;
 		factor += getFactorProbability(task);
-		System.out.println("2.bid "+bid*factor);
 		factor += getFactorCapacity(task);
-		System.out.println("3.bid "+bid*factor);
 		return (long)(bid*factor);
 	}
 
@@ -332,7 +346,6 @@ public class AuctionTemplate implements AuctionBehavior {
 	 */
 	private double getFactorCapacity(Task task) {
 		double factor = Math.exp(task.weight/meanCapacity);
-		System.out.println("factor 2 "+AuctionTemplate.map(factor, 1, Math.exp(1), -0.05, 0.3));
 		return AuctionTemplate.map(factor, 1, Math.exp(1), -0.05, 0.3);
 	}
 
@@ -350,7 +363,6 @@ public class AuctionTemplate implements AuctionBehavior {
 	 * 	the factor
 	 */
 	private double getFactorProbability(Task task) {
-		System.out.println(toDiscover);
 		double probability = 0;
 		City pickup = task.pickupCity;
 		for(City c : toDiscover){
@@ -362,10 +374,9 @@ public class AuctionTemplate implements AuctionBehavior {
 				probability += distribution.probability(onPath, c);
 			}	
 		}
-		//probability/=toDiscover.size();
-		//System.out.println("probability 1 "+-0.15*(2*probability-1));
-		System.out.println("probability 1 "+AuctionTemplate.map(probability, 0, 1, 0.05, -0.15));
-		return AuctionTemplate.map(probability, 0, toDiscover.size(), 0.05, -0.15);
+		probability = Math.log10(probability+1);
+		return AuctionTemplate.map(probability, 0, 1, 0.05, -0.05);
+			
 	}
 
 	/**
@@ -429,6 +440,7 @@ public class AuctionTemplate implements AuctionBehavior {
 		} catch (Exception e) {
 			System.exit(-1);
 		}
+		
 		/**
 		System.out.println("Benefit before minus plan us "+benefit);
 		for(Plan p : result.computePlan(agent.vehicles())){

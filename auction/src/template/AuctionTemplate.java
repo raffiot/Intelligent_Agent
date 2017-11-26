@@ -119,11 +119,7 @@ public class AuctionTemplate implements AuctionBehavior {
 	@Override
 	public void auctionResult(Task previous, int winner, Long[] bids) {
 		iterations++;
-		System.out.println();
-        System.out.println(winner + " won " + previous);
-        for (int i = 0; i < bids.length; ++i) {
-            System.out.println("  " + i + " bidded " + bids[i] + " CHF");
-        }
+		
 		/**
 		 * In case our company is winner we:
 		 * 	we update our current solution with the speculative one that included the task in auction
@@ -169,7 +165,7 @@ public class AuctionTemplate implements AuctionBehavior {
 					/**
 					 * We create the ficticious Vehicle for the opponent 
 					 */
-					System.out.println("mincity :"+minCity.name); //Some debuggin print to see vehicle city
+					//System.out.println("mincity :"+minCity.name); //Some debuggin print to see vehicle city
 					VehicleImpl vi = new VehicleImpl(0, "opponent", (int)meanCapacity, (int)meanCostPerKm, minCity, 0L, Color.black);
 					Vehicle v = vi.getInfo();
 					ArrayList<Vehicle> ve = new ArrayList<Vehicle>();
@@ -205,13 +201,14 @@ public class AuctionTemplate implements AuctionBehavior {
 			}
 			
 			//Method to print speculative opponent plan
+			/**
 			System.out.println("----Opponent-----");
 			if(!op.getSolution().isEmpty()){
 				for(Plan p : op.getSolution().computePlan(op.getVehicle())){
 					System.out.println(p);
 				}
 			}
-			System.out.println("---------------");
+			System.out.println("---------------");*/
 		}
 		firstIteration = false; 
 		
@@ -260,7 +257,7 @@ public class AuctionTemplate implements AuctionBehavior {
 						op.getSolution().putTask(task,op.getVehicle().get(0));
 						CentralizedClass cc = sLS(op.getSolution(), op.getVehicle() , (long)(1/(6.*opponents.size())*timeout_bid+time_start));//TODO: tcondition in fuction of time!!!
 						double cost = cc.computeCost() - op.getCurCost();
-						System.out.println("cost = "+cost+" cc compute cost = "+cc.computeCost()+" getCurCost = "+op.getCurCost());
+						
 						op.setSolution(cc);
 						if(cost < minOpponentCost){
 							minOpponentCost = cost;
