@@ -367,4 +367,12 @@ public class CentralizedClass {
 		}
 		return null;
 	}
+
+	public boolean isEmpty() {
+		for(Vehicle v : nextTask.keySet()){
+			if(!nextTask.get(v).isEmpty())
+				return false;
+		}
+		return true;
+	}
 }

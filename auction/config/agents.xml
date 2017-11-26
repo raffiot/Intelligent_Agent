@@ -12,4 +12,8 @@
 		<set class-path="bin/"/>
 		<set class-name="template.AuctionDummy"/>
 	</agent>
+	<agent name="auction-main-13">
+		<set class-path="bin/"/>
+		<set class-name="template.AuctionTemplate2"/>
+	</agent>
 </agents>
