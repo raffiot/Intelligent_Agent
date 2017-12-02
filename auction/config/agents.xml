@@ -12,8 +12,8 @@
 		<set class-path="bin/"/>
 		<set class-name="template.AuctionDummy"/>
 	</agent>
-	<agent name="auction-main-13">
+	<agent name="auction-main-git">
 		<set class-path="bin/"/>
-		<set class-name="template.AuctionTemplate2"/>
+		<set class-name="template.AuctionAgent"/>
 	</agent>
 </agents>

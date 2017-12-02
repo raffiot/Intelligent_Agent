@@ -119,7 +119,10 @@ public class AuctionTemplate implements AuctionBehavior {
 	@Override
 	public void auctionResult(Task previous, int winner, Long[] bids) {
 		iterations++;
-		
+		System.out.println("previous "+previous+" winner "+winner);
+		for(int i =0; i < bids.length; i++){
+			System.out.println("agent "+i+" bid "+bids[i]);
+		}
 		/**
 		 * In case our company is winner we:
 		 * 	we update our current solution with the speculative one that included the task in auction
@@ -222,6 +225,7 @@ public class AuctionTemplate implements AuctionBehavior {
 	 */
 	@Override
 	public Long askPrice(Task task) {
+		System.out.println("auction for task "+task);
 		//System.out.println("task in auction: "+task);
 		long time_start = System.currentTimeMillis();
 		//System.out.println("task in auction "+task);
@@ -242,7 +246,7 @@ public class AuctionTemplate implements AuctionBehavior {
 			 * This line compute our first cost before opponents influence it
 			 */
 			resultBid = getFactorBid(task,v);
-			resultBid = Math.max(resultBid, 30);
+			
 			double minOpponentCost = Double.MAX_VALUE;
 			if(!firstIteration){
 				
@@ -307,7 +311,7 @@ public class AuctionTemplate implements AuctionBehavior {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+		resultBid = Math.max(resultBid, -1);
 		return resultBid;
 	}
 
@@ -327,6 +331,7 @@ public class AuctionTemplate implements AuctionBehavior {
 	 */
 	private Long getFactorBid(Task task, Vehicle v) throws Exception {
 		Long bid = new Long( getInitialBid(task,v));
+		System.out.println("marginalCost = "+bid);
 		double factor = 1.;
 		factor += getFactorProbability(task);
 		factor += getFactorCapacity(task);
@@ -412,6 +417,9 @@ public class AuctionTemplate implements AuctionBehavior {
 		ourFutureSolution = sLS(ourFutureSolution, agent.vehicles(), (long)((4/6.)*timeout_bid+time_start));
 		
 		futureMaginalCost = ourFutureSolution.computeCost();
+//		for(Plan p : ourFutureSolution.computePlan(agent.vehicles())){
+//			System.out.println(p);
+//		}
 		return futureMaginalCost-marginalCost;
 	}
 
@@ -427,9 +435,26 @@ public class AuctionTemplate implements AuctionBehavior {
 	public List<Plan> plan(List<Vehicle> vehicles, TaskSet tasks) {
 		long time_start = System.currentTimeMillis();
         
+		if(tasks.isEmpty()){
+        	List<Plan> plans = new ArrayList<Plan>();
+        	for(Vehicle v : vehicles){
+    			City currentCity = v.homeCity();
+    			Plan p = new Plan(currentCity);
+    			plans.add(p);
+        	}
+        	return plans;
+        }
+		
 //		System.out.println("Agent " + agent.id() + " has tasks " + tasks);
-       
+		for(Plan p : ourSolution.computePlan(agent.vehicles())){
+			System.out.println(p);
+			//benefit -= Measures.unitsToKM(p.totalDistanceUnits()*5);
+		}
+		
         CentralizedClass result = null;
+        
+        
+        
 		try {
 			result = ourSolution.clone(tasks);
 			result = sLS(result, vehicles, (long)((4/6.)*timeout_plan+time_start));
@@ -438,13 +463,13 @@ public class AuctionTemplate implements AuctionBehavior {
 			System.exit(-1);
 		}
 		
-		/**
-		System.out.println("Benefit before minus plan us "+benefit);
+		
+		//System.out.println("Benefit before minus plan us "+benefit);
 		for(Plan p : result.computePlan(agent.vehicles())){
 			System.out.println(p);
-			benefit -= Measures.unitsToKM(p.totalDistanceUnits()*5);
+			//benefit -= Measures.unitsToKM(p.totalDistanceUnits()*5);
 		}
-		System.out.println("Final Benefit us "+benefit);*/
+		//System.out.println("Final Benefit us "+benefit);*/
         long time_end = System.currentTimeMillis();
         long duration = time_end - time_start;
         System.out.println("The plan was generated in "+duration+" milliseconds.");

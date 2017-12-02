@@ -43,3 +43,19 @@
 2017-11-26 18:25:53,298 ERROR [Worker-3] - System.err - SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
 2017-11-26 18:25:53,299 ERROR [Worker-3] - System.err - SLF4J: Defaulting to no-operation (NOP) logger implementation
 2017-11-26 18:25:53,299 ERROR [Worker-3] - System.err - SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+2017-11-30 14:18:33,500 ERROR [Worker-2] - System.err - SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+2017-11-30 14:18:33,551 ERROR [Worker-2] - System.err - SLF4J: Defaulting to no-operation (NOP) logger implementation
+2017-11-30 14:18:33,551 ERROR [Worker-2] - System.err - SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+2017-12-02 18:18:42,701 ERROR [Worker-5] - System.err - SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+2017-12-02 18:18:42,742 ERROR [Worker-5] - System.err - SLF4J: Defaulting to no-operation (NOP) logger implementation
+2017-12-02 18:18:42,743 ERROR [Worker-5] - System.err - SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+2017-12-02 18:55:28,620 ERROR [org.eclipse.wst.sse.ui.internal.reconcile.StructuredRegionProcessor] - System.err - Exception in thread "org.eclipse.wst.sse.ui.internal.reconcile.StructuredRegionProcessor"
+2017-12-02 18:55:28,622 ERROR [org.eclipse.wst.sse.ui.internal.reconcile.StructuredRegionProcessor] - System.err - java.lang.NullPointerException
+2017-12-02 18:55:28,622 ERROR [org.eclipse.wst.sse.ui.internal.reconcile.StructuredRegionProcessor] - System.err - at org.eclipse.wst.sse.ui.internal.projection.AbstractStructuredFoldingStrategy.getIndexedRegions(AbstractStructuredFoldingStrategy.java:508)
+2017-12-02 18:55:28,622 ERROR [org.eclipse.wst.sse.ui.internal.reconcile.StructuredRegionProcessor] - System.err - at org.eclipse.wst.sse.ui.internal.projection.AbstractStructuredFoldingStrategy.reconcile(AbstractStructuredFoldingStrategy.java:183)
+2017-12-02 18:55:28,622 ERROR [org.eclipse.wst.sse.ui.internal.reconcile.StructuredRegionProcessor] - System.err - at org.eclipse.wst.sse.ui.internal.reconcile.DocumentRegionProcessor.process(DocumentRegionProcessor.java:330)
+2017-12-02 18:55:28,622 ERROR [org.eclipse.wst.sse.ui.internal.reconcile.StructuredRegionProcessor] - System.err - at org.eclipse.wst.sse.ui.internal.reconcile.StructuredRegionProcessor.process(StructuredRegionProcessor.java:258)
+2017-12-02 18:55:28,622 ERROR [org.eclipse.wst.sse.ui.internal.reconcile.StructuredRegionProcessor] - System.err - at org.eclipse.wst.sse.ui.internal.reconcile.DirtyRegionProcessor$BackgroundThread.run(DirtyRegionProcessor.java:691)
+2017-12-02 19:59:24,523 ERROR [Worker-5] - System.err - SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+2017-12-02 19:59:24,525 ERROR [Worker-5] - System.err - SLF4J: Defaulting to no-operation (NOP) logger implementation
+2017-12-02 19:59:24,525 ERROR [Worker-5] - System.err - SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.

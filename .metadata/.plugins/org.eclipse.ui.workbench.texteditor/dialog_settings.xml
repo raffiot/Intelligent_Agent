@@ -9,13 +9,13 @@
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
 			<item value="print"/>
+			<item value="max"/>
 			<item value="plan"/>
 			<item value="toDiscover"/>
 			<item value="prin"/>
 			<item value="removeFirst"/>
 			<item value="remove"/>
 			<item value="addTask"/>
-			<item value="compute"/>
 		</list>
 		<list key="replacehistory">
 		</list>

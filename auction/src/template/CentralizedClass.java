@@ -218,8 +218,10 @@ public class CentralizedClass {
 	 * @return
 	 * 	true if the operation was possible else false
 	 */
+	/**
 	public boolean swapTask(Vehicle v, int indexOld, int indexNew){
 		LinkedList<TaskClass> ll =  nextTask.get(v);
+		
 		TaskClass tc = ll.get(indexOld);
 		if(tc.getType() == TaskClass.delivery){
 			//If we cannot move the delivery at a certain position because it doesn't complete weight constraint
@@ -242,6 +244,31 @@ public class CentralizedClass {
 			ll.add(indexNew, tc);
 			return true;
 		}
+	}*/
+	public boolean swapTask(Vehicle v, int indexOld, int indexNew){
+		LinkedList<TaskClass> llcopy =  new LinkedList<TaskClass>(nextTask.get(v));	
+		TaskClass tc = llcopy.get(indexOld);
+		llcopy.remove(tc);
+		llcopy.add(indexNew, tc);
+		int load = 0;
+		boolean[] tasksInOrder = new boolean[this.getNbTask(v)];
+		for(int i = 0; i < tasksInOrder.length; i++){
+			tasksInOrder[i] = false;
+		}
+		for(int i = 0; i < llcopy.size(); i++){
+			load += llcopy.get(i).getWeight();
+			if(load > v.capacity()){
+				return false;
+			}
+			if(llcopy.get(i).getType() == TaskClass.delivery && !tasksInOrder[i]){
+				return false;
+			}
+			if(llcopy.get(i).getType() == TaskClass.pickup){
+				tasksInOrder[i] = true;
+			}
+		}
+		nextTask.put(v, llcopy);
+		return true;
 	}
 	
 	/**
