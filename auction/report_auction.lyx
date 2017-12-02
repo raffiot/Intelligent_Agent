@@ -1,0 +1,473 @@
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\begin_preamble
+
+
+\usepackage{textcomp}
+% add other packages here
+
+% put your group number and names in the author field
+\title{\bf Exercise 5: An Auctioning Agent for the Pickup and Delivery Problem}
+\author{Group 20 \textnumero: Rafael Madillo, David FernÃ¡ndez Navarro}
+\end_preamble
+\use_default_options false
+\maintain_unincluded_children false
+\language english
+\language_package none
+\inputencoding auto
+\fontencoding default
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize 11
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_package amsmath 2
+\use_package amssymb 0
+\use_package cancel 0
+\use_package esint 1
+\use_package mathdots 0
+\use_package mathtools 0
+\use_package mhchem 0
+\use_package stackrel 0
+\use_package stmaryrd 0
+\use_package undertilde 0
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+maketitle
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Bidding strategy
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+% describe in details your bidding strategy.
+ Also, focus on answering the following questions:
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+% - do you consider the probability distribution of the tasks in defining
+ your strategy? How do you speculate about the future tasks that might be
+ auctions?
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+% - how do you use the feedback from the previous auctions to derive information
+ about the other competitors?
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+% - how do you combine all the information from the probability distribution
+ of the tasks, the history and the planner to compute bids?
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Our bidding strategy is defined mainly in the function askPrice, helped
+ by actionResult and some others auxiliary functions.
+ Starting by askPrice function, where we return our best bid for a certain
+ task, first thing we do is to compute the bid price based on certain parameters
+ except the ones that includes the opponent.
+ So for this, we create the initial bid based on the marginal cost, which
+ is, the minimum reward we need for having benefit zero.
+ After having this 
+\emph on
+initialBid
+\emph default
+, we apply over it some factors to improve it, one based on the probability
+ distribution of the tasks and another one based on the weight of the task.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+probabilityFactor:
+\emph default
+ we check how popular are the cities that are going to be introduced in
+ the path to take and then delivery the task, the more probability of new
+ tasks the more that taking the task worth.
+ So, if the probability of having new tasks is high we apply up to a 15%
+ of reduction of our bid, on the other side, if probability is low we can
+ increment our bid price up to a 15%.
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+factorCapacity:
+\emph default
+ if the weight of the task is big compared with mean of our vehicle capacity
+ it doesn’t worth taking the task because it will probably penalize us in
+ a future, as we won’t be able to carry many in the same time, so we tend
+ to penalize heavy tasks.
+\end_layout
+
+\begin_layout Standard
+Once we have the total factor we apply it to the initial bid and then, we
+ try to use all information we have from the opponents to improve even more
+ our bid.
+ Because of not having enough information, only for the first iteration
+ our bid is not modified by the opponents, next iterations do.
+ Until task ten we compute what we think that approximately is going to
+ be our opponents bid for everyone, then only for the best three opponents,
+ which are the ones that have won more tasks.
+ To compute their plans, we imagine a model where they only have one vehicle
+ and we estimate its initial city by their bid for the first task.
+ We create a fictive vehicle for them with our data and this departure city
+ and on every iteration we compute their best plans if they take the task.
+ With this we get the best possible bid of the opponent and if the difference
+ between this bid and our is less than a 5% we return our bid as a 95% of
+ the previous, else, if we see that our bid is really good and that opponents
+ are far from us we make it greater (a 5%) so that we can earn more money
+ with it.
+\end_layout
+
+\begin_layout Standard
+It’s important to know that for computing the best plan, we reuse the SLS
+ algorithm we created for the previous assignment with small changes, such
+ that the initial solution for every new task is the previous best solution.
+\end_layout
+
+\begin_layout Standard
+This was the 
+\emph on
+askPrice
+\emph default
+ function, for 
+\emph on
+actionResult
+\emph default
+, what we do is to add the task to the plan of the winner so that after
+ we can compute the plan in the 
+\emph on
+askPrice
+\emph default
+ function.
+ Also, as we explained before, for the first iteration, based on the opponents
+ bid, we create their fictive initial plan.
+ 
+\end_layout
+
+\begin_layout Standard
+Summarizing, 
+\end_layout
+
+\begin_layout Itemize
+We compute our initial bid based on the marginal cost for this bid in our
+ plan by using the SLS algorithm.
+ 
+\end_layout
+
+\begin_layout Itemize
+We use probability distribution to improve o penalize bids as we prefer
+ taking the ones that leads us other tasks.
+ 
+\end_layout
+
+\begin_layout Itemize
+We compute and save the plan that we think others are doing by using the
+ bid winners and also, for the first iteration, every bid.
+\end_layout
+
+\begin_layout Itemize
+We have defined how much we think each situation must affect the bid so
+ we combine this into a multiply factor and then we multiply initial bid
+ with this factor.
+\end_layout
+
+\begin_layout Section
+Results
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+% in this section, you describe several results from the experiments with
+ your auctioning agent
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Experiment 1: Comparisons with dummy agents
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+% in this experiment you observe how the results depends on the number of
+ tasks auctioned.
+ You compare with some dummy agents and potentially several versions of
+ your agent (with different internal parameter values).
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Setting
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+% you describe how you perform the experiment, the environment and description
+ of the agents you compare with
+\end_layout
+
+\end_inset
+
+We run the experiment against a dummy agent, in Switzerland and with 15
+ tasks.
+ Both agents have the same two vehicles, same capacity and starting city
+ - Lausanne and Bern-.
+\end_layout
+
+\begin_layout Subsubsection
+Observations
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+% you describe the experimental results and the conclusions you inferred
+ from these results
+\end_layout
+
+\end_inset
+
+Results shows taht our agent take 14 while the dummy agent 1, we do it with
+ a profit of 289 and the other agent 270, so we won this first round.
+\end_layout
+
+\begin_layout Subsection
+Experiment 2
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+% other experiments you would like to present (for example, varying the
+ internal parameter values)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Setting
+\end_layout
+
+\begin_layout Standard
+We run this experiment with the same configuration as the previous one but
+ modifying one of our parameters, the maximun 
+\emph on
+probabilityFactyor
+\emph default
+, which goes from 0,05 to 0,15, so, because of this, our bids will tend
+ to be greater.
+\end_layout
+
+\begin_layout Subsubsection
+Observations
+\end_layout
+
+\begin_layout Standard
+Result shows that in this situation we win all of the tasks, so for us is
+ 15 and for the dummy agent 0.
+ Because of this, reward for the opponent is 0, while our is 2343.
+ Comparing this with the previous experiment we can see that the 
+\emph on
+total reward
+\emph default
+ is 2343 instead of 559, so for this round we have won all bids but also
+ got a better profit, as supposed.
+ This represents the method we have followed for our bid plan, which is
+ taking too many tasks with a really small bid and not leting the opponent
+ take any.
+\end_layout
+
+\begin_layout Subsection
+Experiment 3
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+% other experiments you would like to present (for example, varying the
+ internal parameter values)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Setting
+\end_layout
+
+\begin_layout Standard
+We repeat the same experiment, the 2.1, but this time changing the 
+\emph on
+capacityFactor
+\emph default
+ from 0,3 to 0,6 for maximun value, as before, it will make our bids greater.
+\end_layout
+
+\begin_layout Subsubsection
+Observations
+\end_layout
+
+\begin_layout Standard
+For this observation, we see some results similar to the previous ones,
+ much bigger bids, and rewards.
+ For us, total profit is 1824, for dummy, 654, total reward is 2478, this
+ time total reward is bigger but we get less benefits.
+ Strategy is using higher values for our bids but, as before, as we think
+ that opponents will tend to use small bids we will submit our experiment
+ with greater values than before starting this experiment report.
+ Max value for 
+\emph on
+capacityFactor
+\emph default
+ is going to be 0,3 while for 
+\emph on
+probabilityFactor
+\emph default
+ 0,08, so that our bids are bigger but we think that small enought for betting
+ other intelligent agents.
+\end_layout
+
+\end_body
+\end_document

@@ -377,7 +377,7 @@ public class AuctionTemplate implements AuctionBehavior {
 			}	
 		}
 		probability = Math.log10(probability+1);
-		return AuctionTemplate.map(probability, 0, 1, 0.05, -0.05);
+		return AuctionTemplate.map(probability, 0, 1, 0.15, -0.05);
 			
 	}
 
