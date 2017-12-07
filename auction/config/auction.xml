@@ -64,6 +64,14 @@
 				<set capacity="30" />
 				<set cost-per-km="5" />
 			</vehicle>
+			<!-- the fourth vehicle (yellow) -->
+			<vehicle name="Vehicle 5">
+				<set color="#ffff00" />
+				<set home="Aarau" />
+				<set speed="90" />
+				<set capacity="30" />
+				<set cost-per-km="5" />
+			</vehicle>
 		</company>
 	</companies>
 	

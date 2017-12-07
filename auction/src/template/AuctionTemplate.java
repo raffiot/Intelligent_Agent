@@ -119,6 +119,7 @@ public class AuctionTemplate implements AuctionBehavior {
 	@Override
 	public void auctionResult(Task previous, int winner, Long[] bids) {
 		iterations++;
+		System.out.println("auctionResult");
 		
 		/**
 		 * In case our company is winner we:
@@ -226,6 +227,8 @@ public class AuctionTemplate implements AuctionBehavior {
 		long time_start = System.currentTimeMillis();
 		//System.out.println("task in auction "+task);
 		Long resultBid = Long.MAX_VALUE;
+		System.out.println("askPrice");
+
 		
 		/**
 		 * Here we search for a vehicle with enough capacity to pickup the task,
